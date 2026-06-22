@@ -1,0 +1,20 @@
+IMAGENES DEL PROYECTO
+=====================
+Coloca aqui las imagenes del prototipo con los siguientes nombres exactos.
+
+ESTUDIANTES (carpeta students/)
+-------------------------------
+  students/ismael-gonzalez.jpg       - Foto de Ismael Gonzalez (256x256 px recomendado)
+  students/alejandro-morales.jpg     - Foto de Alejandro Morales (256x256 px)
+  students/sofia-villarreal.jpg      - Foto de Sofia Villarreal (256x256 px)
+  students/julian-rivas.jpg          - Foto de Julian Rivas (256x256 px)
+  students/persona-desconocida.jpg   - Foto generica de persona desconocida (256x256 px)
+
+PANTALLAS / UI
+--------------
+  camera-feed-bg.jpg                 - Fondo del feed de camara en el kiosco (debe verse como pasillo de laboratorio)
+  scan-demo-profile.jpg              - Imagen que aparece durante el escaneo en el kiosco (rostro siendo escaneado)
+  home-hero-preview.jpg              - Imagen del hero en la pantalla de inicio (escaneo facial / tecnologia)
+  default-avatar.jpg                 - Avatar por defecto al registrar nuevo alumno (256x256 px)
+
+FORMATOS ACEPTADOS: JPG, PNG, WebP
