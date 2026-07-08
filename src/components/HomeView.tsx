@@ -9,10 +9,10 @@ import {
   ArrowRight, Lightning, Crosshair, Cloud,
   DeviceMobile, Cpu, Key, Database, ShieldWarning, CheckCircle, X
 } from '@phosphor-icons/react';
-import { AppView } from '../types.ts';
 
 interface HomeViewProps {
-  setView: (view: AppView) => void;
+  onLoginClick: () => void;
+  onStudentKioskClick?: () => void;
 }
 
 const FLOW_STEPS = [
@@ -24,7 +24,7 @@ const FLOW_STEPS = [
   { num: 6, title: 'Acceso', subtitle: 'Relé activado', desc: 'Un token seguro activa la cerradura electromagnética del laboratorio liberando el cerrojo.', icon: Lightning, accent: 'from-accent-500 to-accent-600' },
 ];
 
-export default function HomeView({ setView }: HomeViewProps) {
+export default function HomeView({ onLoginClick, onStudentKioskClick }: HomeViewProps) {
   const [selectedFlowIndex, setSelectedFlowIndex] = useState<number | null>(null);
   const [auditModalOpen, setAuditModalOpen] = useState(false);
   const [auditFormData, setAuditFormData] = useState({ contacto: '', email: '', institucion: '', laboratorios: '1-5', notas: '' });
@@ -86,18 +86,20 @@ export default function HomeView({ setView }: HomeViewProps) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex flex-col sm:flex-row gap-3"
             >
+              {onStudentKioskClick && (
+                <button
+                  onClick={onStudentKioskClick}
+                  className="inline-flex items-center justify-center gap-2 bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-accent-500/20 dark:shadow-accent-500/10"
+                >
+                  Acceder al laboratorio
+                  <ArrowRight className="w-4 h-4" weight="bold" />
+                </button>
+              )}
               <button
-                onClick={() => setView('demo')}
-                className="inline-flex items-center justify-center gap-2 bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-accent-500/20 dark:shadow-accent-500/10"
-              >
-                Iniciar demo interactiva
-                <ArrowRight className="w-4 h-4" weight="bold" />
-              </button>
-              <button
-                onClick={() => setView('architecture')}
+                onClick={onLoginClick}
                 className="inline-flex items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 active:scale-[0.98] text-zinc-700 dark:text-zinc-300 font-semibold px-6 py-3.5 rounded-xl text-sm transition-all"
               >
-                Ver arquitectura cloud
+                Portal Docente
               </button>
             </motion.div>
           </div>

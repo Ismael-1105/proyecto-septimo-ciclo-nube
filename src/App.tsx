@@ -6,10 +6,12 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import Header from './components/Header.tsx';
 import HomeView from './components/HomeView.tsx';
-import DemoView from './components/DemoView.tsx';
 import AdminView from './components/AdminView.tsx';
-import ArchitectureView from './components/ArchitectureView.tsx';
-import { AppView, Student, AccessLog } from './types.ts';
+import LoginView from './LoginView.tsx';
+import ForgotPasswordView from './ForgotPasswordView.tsx';
+import SplashScreen from './components/SplashScreen.tsx';
+import StudentKioskView from './components/StudentView.tsx';
+import { Student, AccessLog, AuthUser } from './types.ts';
 import { INITIAL_STUDENTS, INITIAL_LOGS, DAILY_STATS } from './data.ts';
 
 type Theme = 'light' | 'dark';
@@ -23,7 +25,11 @@ export const ThemeContext = createContext<ThemeContextType>({ theme: 'light', to
 export const useTheme = () => useContext(ThemeContext);
 
 export default function App() {
-  const [currentView, setView] = useState<AppView>('home');
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showStudentKiosk, setShowStudentKiosk] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('theme') as Theme | null;
@@ -57,6 +63,15 @@ export default function App() {
     deniedToday: DAILY_STATS.deniedToday,
     alertsActive: DAILY_STATS.alertsActive
   });
+
+  const handleLogin = (authUser: AuthUser) => {
+    setUser(authUser);
+    setShowLogin(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
 
   const handleToggleStudent = (id: string) => {
     setStudents(prev =>
@@ -96,39 +111,80 @@ export default function App() {
     setLogs([]);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <SplashScreen />
+      </ThemeContext.Provider>
+    );
+  }
+
+  if (showStudentKiosk) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <StudentKioskView
+          students={students}
+          logs={logs}
+          onAddLog={handleAddLog}
+          incrementStats={handleIncrementStats}
+          onBackToLanding={() => setShowStudentKiosk(false)}
+        />
+      </ThemeContext.Provider>
+    );
+  }
+
+  if (showForgotPassword) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ForgotPasswordView onBackToLogin={() => setShowForgotPassword(false)} />
+      </ThemeContext.Provider>
+    );
+  }
+
+  if (showLogin) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <LoginView onLogin={handleLogin} onForgotPassword={() => setShowForgotPassword(true)} />
+      </ThemeContext.Provider>
+    );
+  }
+
+  if (user) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <AdminView
+          students={students}
+          logs={logs}
+          registeredCount={stats.registered}
+          accessesToday={stats.accessesToday}
+          deniedToday={stats.deniedToday}
+          alertsActive={stats.alertsActive}
+          onToggleStudent={handleToggleStudent}
+          onAddStudent={handleAddStudent}
+          onClearLogs={handleClearLogs}
+          onLogout={handleLogout}
+        />
+      </ThemeContext.Provider>
+    );
+  }
+
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="min-h-screen flex flex-col font-sans antialiased bg-surface dark:bg-zinc-950 text-text-primary dark:text-zinc-100 transition-colors duration-300">
         <Header
-          currentView={currentView}
-          setView={setView}
-          logsCount={logs.length}
-          alertsCount={stats.alertsActive}
-          onClearAlerts={handleClearAlerts}
+          onLoginClick={() => setShowLogin(true)}
+          onStudentKioskClick={() => setShowStudentKiosk(true)}
         />
         <div className="flex-grow">
-          {currentView === 'home' && <HomeView setView={setView} />}
-          {currentView === 'demo' && (
-            <DemoView
-              students={students}
-              onAddLog={handleAddLog}
-              incrementStats={handleIncrementStats}
-            />
-          )}
-          {currentView === 'admin' && (
-            <AdminView
-              students={students}
-              logs={logs}
-              registeredCount={stats.registered}
-              accessesToday={stats.accessesToday}
-              deniedToday={stats.deniedToday}
-              alertsActive={stats.alertsActive}
-              onToggleStudent={handleToggleStudent}
-              onAddStudent={handleAddStudent}
-              onClearLogs={handleClearLogs}
-            />
-          )}
-          {currentView === 'architecture' && <ArchitectureView />}
+          <HomeView
+            onLoginClick={() => setShowLogin(true)}
+            onStudentKioskClick={() => setShowStudentKiosk(true)}
+          />
         </div>
       </div>
     </ThemeContext.Provider>

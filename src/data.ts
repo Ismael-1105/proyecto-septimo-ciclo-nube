@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Student, AccessLog, CloudService } from './types.ts';
+import { Student, AccessLog, CloudService, AuthUser, Alert } from './types.ts';
 
 export const INITIAL_STUDENTS: Student[] = [
   {
@@ -199,4 +199,120 @@ export const CLOUD_SERVICES: CloudService[] = [
     actionLabel: 'Health Monitoring',
     status: 'operational'
   }
+];
+
+export const MOCK_ALERTS: Alert[] = [
+  {
+    id: 'alert-1',
+    severity: 'critical',
+    source: 'Kiosk-042',
+    message: 'ALERTA_TERMICA_KIOSK_42: Temperatura del sensor excede 41°C. Riesgo de sobrecalentamiento.',
+    timestamp: '2024-10-24T14:30:00Z',
+    status: 'active',
+  },
+  {
+    id: 'alert-2',
+    severity: 'warning',
+    source: 'AWS CloudWatch',
+    message: 'RETARDO_PING_AWS: Latencia promedio de 85ms en conexión con Rekognition. Umbral recomendado < 50ms.',
+    timestamp: '2024-10-24T14:15:00Z',
+    status: 'active',
+  },
+  {
+    id: 'alert-3',
+    severity: 'info',
+    source: 'Kiosk-042',
+    message: 'CÁMARA_ESTATIC_OK: Cámara IMX415 lista y operativa. Último calibrado: 24/10/2024.',
+    timestamp: '2024-10-24T13:00:00Z',
+    status: 'resolved',
+  },
+  {
+    id: 'alert-4',
+    severity: 'warning',
+    source: 'AWS Lambda',
+    message: 'TIMEOUT_PARCIAL: Función verify-face excedió 2.8s de ejecución en 3 intentos consecutivos.',
+    timestamp: '2024-10-24T12:45:00Z',
+    status: 'acknowledged',
+  },
+  {
+    id: 'alert-5',
+    severity: 'critical',
+    source: 'DynamoDB',
+    message: 'PROVISIONED_THROUGHPUT_EXCEEDED: Pico de 4500 requests/segundo en tabla face-embeddings.',
+    timestamp: '2024-10-23T18:20:00Z',
+    status: 'resolved',
+  },
+  {
+    id: 'alert-6',
+    severity: 'info',
+    source: 'Sistema',
+    message: 'ACTUALIZACIÓN_DISPONIBLE: Nueva versión del firmware 2.4.1 para kioskos. Programar actualización.',
+    timestamp: '2024-10-23T10:00:00Z',
+    status: 'active',
+  },
+  {
+    id: 'alert-7',
+    severity: 'warning',
+    source: 'Kiosk-041',
+    message: 'LECTURA_FALLIDA: 5 intentos fallidos de reconocimiento consecutivos en estación Kiosk-041.',
+    timestamp: '2024-10-22T16:10:00Z',
+    status: 'active',
+  },
+  {
+    id: 'alert-8',
+    severity: 'critical',
+    source: 'AWS SNS',
+    message: 'NOTIFICACIÓN_RECHAZADA: Fallo al enviar alerta SMS al supervisor de turno. Número no registrado.',
+    timestamp: '2024-10-22T09:30:00Z',
+    status: 'resolved',
+  },
+];
+
+export const MOCK_AUTH_USERS: AuthUser[] = [
+  {
+    id: 'doc-1',
+    email: 'docente@faceaccess.lab',
+    password: 'docente123',
+    name: 'Dr. Ismael González',
+    role: 'docente',
+  },
+  {
+    id: 'doc-2',
+    email: 'admin@faceaccess.lab',
+    password: 'admin123',
+    name: 'Ing. Alejandro Morales',
+    role: 'docente',
+  },
+  {
+    id: 'stu-1',
+    email: 'ismael@faceaccess.lab',
+    password: 'estudiante123',
+    name: 'Ismael González',
+    role: 'estudiante',
+    studentId: 'student-ismael',
+  },
+  {
+    id: 'stu-2',
+    email: 'alejandro@faceaccess.lab',
+    password: 'estudiante123',
+    name: 'Alejandro Morales',
+    role: 'estudiante',
+    studentId: 'student-alejandro',
+  },
+  {
+    id: 'stu-3',
+    email: 'sofia@faceaccess.lab',
+    password: 'estudiante123',
+    name: 'Sofia Villarreal',
+    role: 'estudiante',
+    studentId: 'student-sofia',
+  },
+  {
+    id: 'stu-4',
+    email: 'julian@faceaccess.lab',
+    password: 'estudiante123',
+    name: 'Julian Rivas',
+    role: 'estudiante',
+    studentId: 'student-julian',
+  },
 ];

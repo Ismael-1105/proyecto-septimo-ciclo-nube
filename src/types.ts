@@ -36,3 +36,25 @@ export interface CloudService {
 }
 
 export type AppView = 'home' | 'demo' | 'admin' | 'architecture';
+
+export type UserRole = 'docente' | 'estudiante';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: UserRole;
+  studentId?: string;
+}
+
+export type StudentViewType = 'kiosk' | 'profile';
+
+export interface Alert {
+  id: string;
+  severity: 'critical' | 'warning' | 'info';
+  source: string;
+  message: string;
+  timestamp: string;
+  status: 'active' | 'acknowledged' | 'resolved';
+}

@@ -4,12 +4,18 @@
  */
 
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import {
   Users, Heartbeat, ShieldWarning, SignIn, MagnifyingGlass, FileCsv,
-  Plus, CheckCircle, XCircle, Trash, ShieldCheck, Cpu, SlidersHorizontal
+  Plus, CheckCircle, XCircle, Trash, ShieldCheck, Cpu, SlidersHorizontal, SignOut,
+  ChartBar
 } from '@phosphor-icons/react';
 import { Student, AccessLog } from '../types.ts';
+import EnrollmentView from './EnrollmentView.tsx';
+import StudentDetailView from './StudentDetailView.tsx';
+import AlertsCenter from './AlertsCenter.tsx';
+import ReportsView from './ReportsView.tsx';
+import { MOCK_ALERTS } from '../data.ts';
+import type { Alert } from '../types.ts';
 
 interface AdminViewProps {
   students: Student[];
@@ -21,39 +27,27 @@ interface AdminViewProps {
   onToggleStudent: (id: string) => void;
   onAddStudent: (student: Student) => void;
   onClearLogs: () => void;
+  onLogout: () => void;
 }
 
 export default function AdminView({
   students, logs, registeredCount, accessesToday, deniedToday, alertsActive,
-  onToggleStudent, onAddStudent, onClearLogs
+  onToggleStudent, onAddStudent, onClearLogs, onLogout
 }: AdminViewProps) {
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'logs' | 'config'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'logs' | 'alerts' | 'reports' | 'config'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Permitido' | 'Denegado'>('All');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [newStudentData, setNewStudentData] = useState({
-    name: '', career: '', lab: 'LAB-02', matchPercentage: 95.0,
-    status: 'allowed' as 'allowed' | 'denied',
-  });
+  const [showEnrollment, setShowEnrollment] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>(MOCK_ALERTS);
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newStudentData.name || !newStudentData.career) return;
-    const initials = newStudentData.name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
-    const generatedStudent: Student = {
-      id: 'student-' + Math.random().toString(36).substr(2, 9),
-      name: newStudentData.name,
-      career: newStudentData.career,
-      lab: newStudentData.lab,
-      photoUrl: '/images/default-avatar.jpg',
-      matchPercentage: parseFloat(newStudentData.matchPercentage.toString()),
-      status: newStudentData.status,
-      avatarInitials: initials || 'N'
-    };
-    onAddStudent(generatedStudent);
-    setIsRegistering(false);
-    setNewStudentData({ name: '', career: '', lab: 'LAB-02', matchPercentage: 95.0, status: 'allowed' });
+  const handleAcknowledgeAlert = (id: string) => {
+    setAlerts(prev => prev.map(a => a.id === id && a.status === 'active' ? { ...a, status: 'acknowledged' as const } : a));
+  };
+
+  const handleResolveAlert = (id: string) => {
+    setAlerts(prev => prev.map(a => a.id === id ? { ...a, status: 'resolved' as const } : a));
   };
 
   const handleExportCSV = () => {
@@ -84,6 +78,8 @@ export default function AdminView({
     { tab: 'overview' as const, icon: Heartbeat, label: 'Vista General' },
     { tab: 'students' as const, icon: Users, label: `Alumnos (${students.length})` },
     { tab: 'logs' as const, icon: SlidersHorizontal, label: `Historial (${logs.length})` },
+    { tab: 'alerts' as const, icon: ShieldWarning, label: `Alertas (${alerts.filter(a => a.status === 'active').length})` },
+    { tab: 'reports' as const, icon: ChartBar, label: 'Reportes' },
     { tab: 'config' as const, icon: Cpu, label: 'Calibracion' },
   ];
 
@@ -114,12 +110,19 @@ export default function AdminView({
             ))}
           </nav>
         </div>
-        <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800 mt-5 hidden md:block">
+        <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800 mt-5 space-y-3">
           <div className="bg-accent-50 dark:bg-accent-950/30 p-3.5 rounded-xl text-[10px] leading-relaxed border border-accent-100 dark:border-accent-900/50">
             <span className="font-bold text-accent-700 dark:text-accent-300 block mb-1">ESTADO HARDWARE</span>
             <span className="w-2 h-2 rounded-full bg-green-500 inline-block mr-1.5 animate-pulse" />
             <span className="text-zinc-500 dark:text-zinc-400">Kiosk-042 Conectado</span>
           </div>
+          <button
+            onClick={onLogout}
+            className="w-full py-2.5 px-3 text-xs text-left rounded-lg font-semibold transition-all flex items-center gap-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+          >
+            <SignOut className="w-4 h-4" weight="regular" />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 
@@ -254,13 +257,28 @@ export default function AdminView({
         {/* ========== STUDENTS ========== */}
         {activeTab === 'students' && (
           <div className="space-y-6">
+            {selectedStudentId ? (
+              (() => {
+                const student = students.find(s => s.id === selectedStudentId);
+                if (!student) return null;
+                return (
+                  <StudentDetailView
+                    student={student}
+                    logs={logs}
+                    onToggleStatus={onToggleStudent}
+                    onBack={() => setSelectedStudentId(null)}
+                  />
+                );
+              })()
+            ) : (
+              <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
                 <h3 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">Registro de Alumnos</h3>
                 <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">Gestione identidades biometricas del LAB-02.</p>
               </div>
               <button
-                onClick={() => setIsRegistering(!isRegistering)}
+                onClick={() => setShowEnrollment(true)}
                 className="bg-accent-600 hover:bg-accent-700 text-white font-semibold px-4 py-2.5 text-xs rounded-lg uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-[0.98]"
               >
                 <Plus className="w-4 h-4" weight="bold" />
@@ -268,62 +286,11 @@ export default function AdminView({
               </button>
             </div>
 
-            {isRegistering && (
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 max-w-xl shadow-sm">
-                <h4 className="font-bold text-sm text-zinc-900 dark:text-white mb-4">Formulario de Matriculacion</h4>
-                <form onSubmit={handleRegister} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">Nombre</label>
-                    <input type="text" required placeholder="Ej. Sofia Villarreal"
-                      value={newStudentData.name}
-                      onChange={(e) => setNewStudentData({...newStudentData, name: e.target.value})}
-                      className="w-full text-xs p-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-all" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">Carrera</label>
-                    <input type="text" required placeholder="Ej. Ingenieria de Sistemas"
-                      value={newStudentData.career}
-                      onChange={(e) => setNewStudentData({...newStudentData, career: e.target.value})}
-                      className="w-full text-xs p-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-all" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">Laboratorio</label>
-                    <select value={newStudentData.lab}
-                      onChange={(e) => setNewStudentData({...newStudentData, lab: e.target.value})}
-                      className="w-full text-xs p-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-all">
-                      <option value="LAB-01">LAB-01 (Redes)</option>
-                      <option value="LAB-02">LAB-02 (Sistemas Operativos)</option>
-                      <option value="Biblioteca">Biblioteca del Campus</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">Match Min (%)</label>
-                    <input type="number" min="60" max="100" step="0.1" placeholder="95.5"
-                      value={newStudentData.matchPercentage}
-                      onChange={(e) => setNewStudentData({...newStudentData, matchPercentage: parseFloat(e.target.value) || 95})}
-                      className="w-full text-xs p-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-all" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase mb-1">Estado</label>
-                    <select value={newStudentData.status}
-                      onChange={(e) => setNewStudentData({...newStudentData, status: e.target.value as 'allowed' | 'denied'})}
-                      className="w-full text-xs p-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 transition-all">
-                      <option value="allowed">Permitido</option>
-                      <option value="denied">Suspendido</option>
-                    </select>
-                  </div>
-                  <div className="sm:col-span-2 flex justify-end gap-3 pt-1">
-                    <button type="button" onClick={() => setIsRegistering(false)}
-                      className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 rounded-lg text-xs font-medium transition-all">
-                      Cancelar
-                    </button>
-                    <button type="submit"
-                      className="px-5 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-lg font-bold text-xs uppercase transition-all active:scale-[0.98]">
-                      Cargar Biometria
-                    </button>
-                  </div>
-                </form>
-              </div>
+            {showEnrollment && (
+              <EnrollmentView
+                onComplete={(student) => { onAddStudent(student); setShowEnrollment(false); }}
+                onCancel={() => setShowEnrollment(false)}
+              />
             )}
 
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
@@ -341,7 +308,7 @@ export default function AdminView({
                   </thead>
                   <tbody>
                     {filteredStudents.map((student) => (
-                      <tr key={student.id} className="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                      <tr key={student.id} className="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer" onClick={() => setSelectedStudentId(student.id)}>
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex-shrink-0 flex items-center justify-center relative">
@@ -366,7 +333,7 @@ export default function AdminView({
                         </td>
                         <td className="p-4 text-center">
                           <button
-                            onClick={() => onToggleStudent(student.id)}
+                            onClick={(e) => { e.stopPropagation(); onToggleStudent(student.id); }}
                             className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all active:scale-[0.98] ${
                               student.status === 'allowed'
                                 ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50'
@@ -381,8 +348,10 @@ export default function AdminView({
                   </tbody>
                 </table>
               </div>
-            </div>
           </div>
+            </>
+          )}
+        </div>
         )}
 
         {/* ========== LOGS ========== */}
@@ -475,6 +444,20 @@ export default function AdminView({
               </div>
             </div>
           </div>
+        )}
+
+        {/* ========== ALERTS ========== */}
+        {activeTab === 'alerts' && (
+          <AlertsCenter
+            alerts={alerts}
+            onAcknowledge={handleAcknowledgeAlert}
+            onResolve={handleResolveAlert}
+          />
+        )}
+
+        {/* ========== REPORTS ========== */}
+        {activeTab === 'reports' && (
+          <ReportsView logs={logs} />
         )}
 
         {/* ========== CONFIG ========== */}
