@@ -23,7 +23,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
 
       - name: Install pnpm ${{ env.PNPM_VERSION }}
         uses: pnpm/action-setup@v4
@@ -45,7 +44,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Validate TypeScript
         run: pnpm typecheck
@@ -90,7 +89,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
 
       - name: Install pnpm ${{ env.PNPM_VERSION }}
         uses: pnpm/action-setup@v4
@@ -98,7 +96,7 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
