@@ -11,3 +11,5 @@ coverage/
 .opencode/
 .vscode/
 
+
+.vercel
