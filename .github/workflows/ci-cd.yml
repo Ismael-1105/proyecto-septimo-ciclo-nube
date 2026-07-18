@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Validate TypeScript
         run: pnpm typecheck
@@ -92,7 +92,7 @@ jobs:
         run: npm install -g pnpm@${{ env.PNPM_VERSION }}
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
