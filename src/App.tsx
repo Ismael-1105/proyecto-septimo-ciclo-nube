@@ -61,8 +61,6 @@ function AppContent() {
 
   if (isLoading) return <SplashScreen />;
 
-  const { setShowPermissionGate } = useApp();
-
   return (
     <Routes>
       <Route element={<Layout />}>
