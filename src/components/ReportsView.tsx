@@ -67,7 +67,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
         </div>
         <div className="flex gap-2">
           <button onClick={handleExportCSV}
-            className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+            className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
             <FileCsv className="w-4 h-4" weight="regular" />
             Exportar CSV
           </button>
@@ -79,7 +79,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
         {['day', 'week', 'month'].map(p => (
           <button key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               period === p
                 ? 'bg-accent-600 text-white shadow-sm'
                 : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -144,19 +144,31 @@ export default function ReportsView({ logs }: ReportsViewProps) {
             <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Horas Pico</h4>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">Concentración de accesos por hora.</p>
           </div>
-          <div className="space-y-2">
-            {PEAK_HOURS.map(({ hour, count }) => {
-              const max = Math.max(...PEAK_HOURS.map(h => h.count));
-              const pct = (count / max) * 100;
+          <div className="space-y-4">
+            {[
+              { label: 'Mañana (07:00–11:00)', data: PEAK_HOURS.slice(0, 4) },
+              { label: 'Mediodía (12:00–15:00)', data: PEAK_HOURS.slice(4, 8) },
+            ].map(group => {
+              const max = Math.max(...group.data.map(h => h.count));
               return (
-                <div key={hour} className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 w-20 flex-shrink-0">{hour}</span>
-                  <div className="flex-1 h-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                    <div style={{ width: `${pct}%` }}
-                      className="h-full rounded-lg bg-gradient-to-r from-accent-500 to-accent-600"
-                    />
+                <div key={group.label}>
+                  <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">{group.label}</p>
+                  <div className="space-y-1.5">
+                    {group.data.map(({ hour, count }) => {
+                      const pct = (count / max) * 100;
+                      return (
+                        <div key={hour} className="flex items-center gap-3">
+                          <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 w-20 flex-shrink-0">{hour}</span>
+                          <div className="flex-1 h-4 rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                            <div style={{ width: `${pct}%` }}
+                              className="h-full rounded-xl bg-gradient-to-r from-accent-500 to-accent-600"
+                            />
+                          </div>
+                          <span className="text-[10px] font-mono font-bold text-zinc-500 dark:text-zinc-400 w-6 text-right">{count}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-zinc-500 dark:text-zinc-400 w-6 text-right">{count}</span>
                 </div>
               );
             })}
@@ -176,7 +188,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
           {TOP_STUDENTS.map((s, i) => (
             <div key={s.name} className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
               <div className="flex items-center gap-3">
-                <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold ${
+                <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-bold ${
                   i === 0 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
                   i === 1 ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-300' :
                   i === 2 ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' :
@@ -186,7 +198,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
               </div>
               <div className="flex items-center gap-4">
                 <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{s.accesses} accesos</span>
-                <span className="text-[10px] font-mono font-bold bg-accent-50 dark:bg-accent-950/30 text-accent-700 dark:text-accent-300 px-2 py-0.5 rounded-lg">{s.avg}%</span>
+                <span className="text-[10px] font-mono font-bold bg-accent-50 dark:bg-accent-950/30 text-accent-700 dark:text-accent-300 px-2 py-0.5 rounded-xl">{s.avg}%</span>
               </div>
             </div>
           ))}
@@ -203,7 +215,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
             { label: 'Pico Semanal', value: `${Math.max(...DAILY_STATS.chartData.map(d => d.count))} (Vie)` },
             { label: 'Tasa de Autorización', value: totalAccesses > 0 ? `${((permitidos / totalAccesses) * 100).toFixed(1)}%` : '0%' },
           ].map(({ label, value }) => (
-            <div key={label} className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+            <div key={label} className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
               <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase">{label}</p>
               <p className="text-sm font-black text-zinc-900 dark:text-white mt-0.5">{value}</p>
             </div>

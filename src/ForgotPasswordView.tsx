@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Fingerprint, ArrowLeft, CheckCircle, Envelope } from '@phosphor-icons/react';
 import { MOCK_AUTH_USERS } from './data.ts';
 
-interface ForgotPasswordViewProps {
-  onBackToLogin: () => void;
-}
-
-export default function ForgotPasswordView({ onBackToLogin }: ForgotPasswordViewProps) {
+export default function ForgotPasswordView() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -74,7 +72,7 @@ export default function ForgotPasswordView({ onBackToLogin }: ForgotPasswordView
                 </p>
               </div>
               <button
-                onClick={onBackToLogin}
+                onClick={() => navigate('/login')}
                 className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-accent-600 dark:text-accent-400 hover:underline transition-all"
               >
                 <ArrowLeft className="w-3.5 h-3.5" weight="bold" />
@@ -119,7 +117,7 @@ export default function ForgotPasswordView({ onBackToLogin }: ForgotPasswordView
 
               <button
                 type="button"
-                onClick={onBackToLogin}
+                onClick={() => navigate('/login')}
                 className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all"
               >
                 <ArrowLeft className="w-3.5 h-3.5" weight="bold" />

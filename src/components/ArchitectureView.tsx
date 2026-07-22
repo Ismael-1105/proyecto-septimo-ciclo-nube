@@ -24,8 +24,15 @@ const iconMapping: Record<string, React.ComponentType<{ className?: string; weig
   LineChart: ChartLine
 };
 
+const CATEGORIES = [
+  { id: 'vision', label: 'Visión', icon: Cpu, services: ['aws-rekognition', 'aws-liveness'] },
+  { id: 'compute', label: 'Procesamiento', icon: Cpu, services: ['aws-lambda', 'aws-api', 'aws-dynamo'] },
+  { id: 'infra', label: 'Infraestructura', icon: Database, services: ['aws-s3', 'aws-cognito', 'aws-sns', 'aws-cloudwatch'] },
+];
+
 export default function ArchitectureView() {
   const [selectedService, setSelectedService] = useState<CloudService>(CLOUD_SERVICES[0]);
+  const [activeCategory, setActiveCategory] = useState('vision');
 
   const getTelemetryStats = (id: string) => {
     switch (id) {
@@ -71,12 +78,12 @@ export default function ArchitectureView() {
   const ActiveIcon = iconMapping[selectedService.iconName] || Cloud;
 
   return (
-    <div className="pt-16 min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <div className="pt-16 min-h-screen bg-surface dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col">
       {/* Header */}
       <section className="py-14 md:py-20 px-5 md:px-8 border-b border-zinc-800/50 bg-gradient-to-b from-zinc-900 to-zinc-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#27272a20_1px,transparent_1px),linear-gradient(to_bottom,#27272a20_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <span className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-800/80 border border-zinc-700/50 text-accent-400 text-[10px] font-mono tracking-wider uppercase rounded-lg mb-5">
+          <span className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-800/80 border border-zinc-700/50 text-accent-400 text-[10px] font-mono tracking-wider uppercase rounded-xl mb-5">
             <Cloud className="w-3 h-3" weight="fill" />
             AWS Infrastructure & Edge Deployment
           </span>
@@ -94,11 +101,35 @@ export default function ArchitectureView() {
         {/* Left: service grid */}
         <div className="lg:col-span-7 flex flex-col gap-5">
           <div>
-            <h3 className="text-sm font-bold tracking-wider uppercase text-zinc-500 font-mono">Consola de Servicios Activos</h3>
-            <p className="text-xs text-zinc-500 mt-1">Seleccione un servicio para auditar metricas:</p>
+            <h3 className="text-sm font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400 font-mono">Consola de Servicios Activos</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {CLOUD_SERVICES.map((srv) => {
+
+          {/* Category tabs — 9 servicios agrupados en 3 categorias (Hick's Law) */}
+          <div className="flex gap-1 bg-zinc-800 rounded-xl p-1 w-fit">
+            {CATEGORIES.map(cat => {
+              const CatIcon = cat.icon;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                    activeCategory === cat.id
+                      ? 'bg-white text-zinc-900 shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-300'
+                  }`}
+                >
+                  <CatIcon className="w-3.5 h-3.5" weight={activeCategory === cat.id ? 'fill' : 'regular'} />
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {CLOUD_SERVICES.filter(srv => {
+              const cat = CATEGORIES.find(c => c.services.includes(srv.id));
+              return cat?.id === activeCategory;
+            }).map((srv) => {
               const ServiceIcon = iconMapping[srv.iconName] || Cloud;
               const isSelected = selectedService.id === srv.id;
               return (
@@ -112,7 +143,7 @@ export default function ArchitectureView() {
                   }`}
                 >
                   <div className="flex justify-between items-start">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
                       isSelected ? 'bg-accent-600 text-white' : 'bg-zinc-800 text-zinc-400'
                     }`}>
                       <ServiceIcon className="w-4 h-4" weight={isSelected ? 'fill' : 'regular'} />
@@ -157,7 +188,7 @@ export default function ArchitectureView() {
                       <h3 className="text-base font-bold text-white tracking-tight leading-none mt-1">{selectedService.name}</h3>
                     </div>
                   </div>
-                  <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] py-1 px-2.5 rounded-lg font-bold font-mono">
+                  <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] py-1 px-2.5 rounded-xl font-bold font-mono">
                     Operational
                   </span>
                 </div>
@@ -219,7 +250,7 @@ export default function ArchitectureView() {
               { title: 'Rele Normalmente Cerrado', desc: 'La bobina posee un capacitor de estado solido que mantiene liberada la cerradura si se decreta contingencia critica.' },
             ].map((item, i) => (
               <div key={i} className="p-6 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3">
-                <div className="w-8 h-8 rounded-lg bg-accent-950/50 border border-accent-800/30 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-accent-950/50 border border-accent-800/30 flex items-center justify-center">
                   <span className="text-accent-400 font-mono font-bold text-xs">{i + 1}</span>
                 </div>
                 <span className="text-white font-bold text-sm tracking-tight block">{item.title}</span>

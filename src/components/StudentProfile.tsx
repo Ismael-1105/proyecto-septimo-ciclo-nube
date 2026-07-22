@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, Fingerprint, House, CheckCircle, XCircle, SignIn } from '@phosphor-icons/react';
+import { ArrowLeft, Fingerprint, CheckCircle, XCircle, SignIn } from '@phosphor-icons/react';
 import { Student, AccessLog } from '../types.ts';
 
 interface StudentProfileProps {
@@ -10,7 +11,8 @@ interface StudentProfileProps {
   onBackToLanding: () => void;
 }
 
-export default function StudentProfile({ student, logs, onBack, onBackToLanding }: StudentProfileProps) {
+export default function StudentProfile({ student, logs, onBack }: StudentProfileProps) {
+  const navigate = useNavigate();
   const latestLog = logs[0];
   const totalAccesses = logs.length;
   const granted = logs.filter(l => l.result === 'Permitido').length;
@@ -23,6 +25,7 @@ export default function StudentProfile({ student, logs, onBack, onBackToLanding 
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all"
+          aria-label="Volver al kiosco"
         >
           <ArrowLeft className="w-4 h-4" weight="regular" />
           Volver al Kiosco
@@ -34,11 +37,11 @@ export default function StudentProfile({ student, logs, onBack, onBackToLanding 
           <span className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">FaceAccess</span>
         </div>
         <button
-          onClick={onBackToLanding}
+          onClick={() => navigate('/')}
           className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all"
+          aria-label="Salir del perfil"
         >
-          <House className="w-4 h-4" weight="regular" />
-          Inicio
+          Salir
         </button>
       </div>
 

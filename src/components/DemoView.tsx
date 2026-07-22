@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Camera, FilmSlate, ArrowsClockwise, XCircle, CheckCircle,
   Lock, LockOpen, Printer, Question, ClockCounterClockwise,
@@ -11,18 +12,17 @@ import {
 } from '@phosphor-icons/react';
 import { Student, AccessLog } from '../types.ts';
 import { INITIAL_STUDENTS } from '../data.ts';
+import { useApp } from '../context/AppContext.tsx';
+import CameraPermissionGate from './CameraPermissionGate.tsx';
 
-interface DemoViewProps {
-  students: Student[];
-  onAddLog: (log: AccessLog) => void;
-  incrementStats: (isAllowed: boolean) => void;
-}
-
-export default function DemoView({ students, onAddLog, incrementStats }: DemoViewProps) {
+export default function DemoView() {
+  const { students: appStudents, handleAddLog, handleIncrementStats } = useApp();
   const [flowState, setFlowState] = useState<'idle' | 'scanning' | 'processing' | 'result'>('idle');
   const [selectedStudent, setSelectedStudent] = useState<Student>(INITIAL_STUDENTS[0]);
   const [useWebcam, setUseWebcam] = useState(false);
   const [webcamActive, setWebcamActive] = useState(false);
+  const [cameraPermissionChecked, setCameraPermissionChecked] = useState(false);
+  const [showDemoPermissionGate, setShowDemoPermissionGate] = useState(false);
 
   const [globalProgress, setGlobalProgress] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -120,8 +120,8 @@ export default function DemoView({ students, onAddLog, incrementStats }: DemoVie
               similarity: parseFloat(similarityScore.toFixed(1))
             };
 
-            onAddLog(newLog);
-            incrementStats(isAllowed);
+            handleAddLog(newLog);
+            handleIncrementStats(isAllowed);
             stopWebcam();
             return 100;
           }
@@ -182,31 +182,44 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
     document.body.removeChild(a);
   };
 
+  if (showDemoPermissionGate) {
+    return (
+      <CameraPermissionGate
+        onProceed={() => {
+          setShowDemoPermissionGate(false);
+          setCameraPermissionChecked(true);
+          setUseWebcam(true);
+          setFlowState('scanning');
+          setGlobalProgress(0);
+        }}
+        onCancel={() => setShowDemoPermissionGate(false)}
+      />
+    );
+  }
+
   return (
     <div className="pt-16 min-h-screen bg-surface dark:bg-zinc-950 flex flex-col">
       {/* Selector bar */}
       <section className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-3 px-5 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <p className="text-[10px] font-mono tracking-wider uppercase text-zinc-400 dark:text-zinc-500 font-semibold">Control de simulacion</p>
+          <p className="text-[10px] font-mono tracking-wider uppercase text-zinc-400 dark:text-zinc-500 font-semibold">Control de simulación</p>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium mt-0.5">Selecciona un perfil para simular el escaneo:</p>
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <select
+          value={selectedStudent.id}
+          onChange={(e) => {
+            const student = INITIAL_STUDENTS.find(s => s.id === e.target.value);
+            if (student) { setSelectedStudent(student); setFlowState('idle'); }
+          }}
+          disabled={flowState === 'scanning' || flowState === 'processing'}
+          className="px-3 py-2 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none transition-all disabled:opacity-40 min-w-[200px]"
+        >
           {INITIAL_STUDENTS.map((student) => (
-            <button
-              key={student.id}
-              disabled={flowState === 'scanning' || flowState === 'processing'}
-              onClick={() => { setSelectedStudent(student); setFlowState('idle'); }}
-              className={`px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-2 font-medium ${
-                selectedStudent.id === student.id
-                  ? 'bg-accent-600 text-white ring-2 ring-accent-200 dark:ring-accent-800'
-                  : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 disabled:opacity-40'
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${student.status === 'allowed' ? 'bg-green-500' : 'bg-red-500'}`} />
-              {student.name.split(' ')[0]}{student.id === 'student-unknown' ? ' (Intruso)' : ''}
-            </button>
+            <option key={student.id} value={student.id}>
+              {student.name}{student.id === 'student-unknown' ? ' (Intruso)' : ''} — {student.matchPercentage}%
+            </option>
           ))}
-        </div>
+        </select>
       </section>
 
       {/* Main terminal */}
@@ -444,7 +457,14 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                     )}
                     {flowState === 'idle' ? (
                       <button
-                        onClick={() => { setFlowState('scanning'); setGlobalProgress(0); }}
+                        onClick={() => {
+                          if (useWebcam && !cameraPermissionChecked) {
+                            setShowDemoPermissionGate(true);
+                          } else {
+                            setFlowState('scanning');
+                            setGlobalProgress(0);
+                          }
+                        }}
                         className="bg-accent-600 hover:bg-accent-700 text-white font-semibold py-2.5 px-6 rounded-lg text-xs uppercase tracking-wider active:scale-[0.98] transition-all"
                       >
                         Iniciar Escaneo
@@ -493,14 +513,14 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                         />
                         <span className="absolute text-4xl font-bold text-zinc-400 dark:text-zinc-500">{selectedStudent.avatarInitials}</span>
                       </div>
-                      <span className={`mt-2.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      <span className={`mt-2.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
                         selectedStudent.status === 'allowed' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                       }`}>
                         Match: {selectedStudent.status === 'allowed' ? simulatedMatchPct : '22.8'}%
                       </span>
                     </div>
 
-                    <div className="flex-grow text-left space-y-3.5 pl-0 sm:pl-4">
+                    <div className="flex-grow text-left space-y-4 pl-0 sm:pl-4">
                       <div>
                         <span className="text-[9px] font-mono tracking-wider text-zinc-400 dark:text-zinc-500 block font-bold uppercase">Estudiante</span>
                         <p className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">{selectedStudent.name}</p>
@@ -516,7 +536,7 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                      <div className="pt-5 mt-2 border-t border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {selectedStudent.status === 'allowed' ? (
                             <>
@@ -571,16 +591,6 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-3.5 px-5 md:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-zinc-400 dark:text-zinc-500 gap-3">
-        <span>&copy; 2024 FaceAccess Lab</span>
-        <div className="flex gap-5">
-          <a href="#" className="hover:text-accent-600 dark:hover:text-accent-400 transition-colors">Normativa</a>
-          <a href="#" className="hover:text-accent-600 dark:hover:text-accent-400 transition-colors">Garantia</a>
-          <a href="#" className="hover:text-accent-600 dark:hover:text-accent-400 transition-colors">Seguridad</a>
-        </div>
-      </footer>
     </div>
   );
 }

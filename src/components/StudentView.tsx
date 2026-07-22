@@ -13,6 +13,7 @@ interface StudentViewProps {
   onAddLog: (log: AccessLog) => void;
   incrementStats: (isAllowed: boolean) => void;
   onBackToLanding: () => void;
+  hasCameraPermission: boolean;
 }
 
 function pickRandomStudent(students: Student[]): Student {
@@ -20,7 +21,7 @@ function pickRandomStudent(students: Student[]): Student {
   return students[idx];
 }
 
-export default function StudentView({ students, logs, onAddLog, incrementStats, onBackToLanding }: StudentViewProps) {
+export default function StudentView({ students, logs, onAddLog, incrementStats, onBackToLanding, hasCameraPermission }: StudentViewProps) {
   const [activeView, setActiveView] = useState<StudentViewType>('kiosk');
   const [scannedStudent, setScannedStudent] = useState<Student>(() => pickRandomStudent(students));
 
@@ -37,12 +38,39 @@ export default function StudentView({ students, logs, onAddLog, incrementStats, 
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [webcamActive, setWebcamActive] = useState(false);
+
+  const startWebcam = async () => {
+    try {
+      stopWebcam();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: 'user' }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setWebcamActive(true);
+    } catch {
+      setWebcamActive(false);
+    }
+  };
+
   const stopWebcam = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    setWebcamActive(false);
   };
+
+  useEffect(() => {
+    if (hasCameraPermission && flowState === 'scanning') {
+      startWebcam();
+    } else if (flowState === 'idle' || flowState === 'result') {
+      stopWebcam();
+    }
+  }, [hasCameraPermission, flowState]);
 
   useEffect(() => {
     stopWebcam();
@@ -255,6 +283,14 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                     />
                     <div className="absolute inset-0 bg-accent-950/10 mix-blend-color" />
                   </div>
+                ) : hasCameraPermission && webcamActive ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover scale-x-[-1] opacity-70"
+                  />
                 ) : (
                   <div className="w-full h-full relative">
                     <img
@@ -500,14 +536,14 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                         />
                         <span className="absolute text-4xl font-bold text-zinc-400 dark:text-zinc-500">{scannedStudent.avatarInitials}</span>
                       </div>
-                      <span className={`mt-2.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      <span className={`mt-2.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
                         scannedStudent.status === 'allowed' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                       }`}>
                         Match: {scannedStudent.status === 'allowed' ? simulatedMatchPct : '22.8'}%
                       </span>
                     </div>
 
-                    <div className="flex-grow text-left space-y-3.5 pl-0 sm:pl-4">
+                    <div className="flex-grow text-left space-y-4 pl-0 sm:pl-4">
                       <div>
                         <span className="text-[9px] font-mono tracking-wider text-zinc-400 dark:text-zinc-500 block font-bold uppercase">Estudiante</span>
                         <p className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">{scannedStudent.name}</p>
@@ -523,7 +559,7 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                      <div className="pt-5 mt-2 border-t border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {scannedStudent.status === 'allowed' ? (
                             <>

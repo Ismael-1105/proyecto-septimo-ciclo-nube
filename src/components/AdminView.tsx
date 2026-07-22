@@ -4,36 +4,28 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Users, Heartbeat, ShieldWarning, SignIn, MagnifyingGlass, FileCsv,
   Plus, CheckCircle, XCircle, Trash, ShieldCheck, Cpu, SlidersHorizontal, SignOut,
-  ChartBar
+  ChartBar, List
 } from '@phosphor-icons/react';
-import { Student, AccessLog } from '../types.ts';
+import { useApp } from '../context/AppContext.tsx';
 import EnrollmentView from './EnrollmentView.tsx';
 import StudentDetailView from './StudentDetailView.tsx';
 import AlertsCenter from './AlertsCenter.tsx';
 import ReportsView from './ReportsView.tsx';
+import ConfirmDialog from './ConfirmDialog.tsx';
+import EmptyState from './EmptyState.tsx';
 import { MOCK_ALERTS } from '../data.ts';
 import type { Alert } from '../types.ts';
 
-interface AdminViewProps {
-  students: Student[];
-  logs: AccessLog[];
-  registeredCount: number;
-  accessesToday: number;
-  deniedToday: number;
-  alertsActive: number;
-  onToggleStudent: (id: string) => void;
-  onAddStudent: (student: Student) => void;
-  onClearLogs: () => void;
-  onLogout: () => void;
-}
-
-export default function AdminView({
-  students, logs, registeredCount, accessesToday, deniedToday, alertsActive,
-  onToggleStudent, onAddStudent, onClearLogs, onLogout
-}: AdminViewProps) {
+export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'arquitectura' } = {}) {
+  const {
+    students, logs, stats,
+    handleToggleStudent, handleAddStudent, handleClearLogs,
+  } = useApp();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'logs' | 'alerts' | 'reports' | 'config'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +33,9 @@ export default function AdminView({
   const [showEnrollment, setShowEnrollment] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>(MOCK_ALERTS);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [studentSearch, setStudentSearch] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleAcknowledgeAlert = (id: string) => {
     setAlerts(prev => prev.map(a => a.id === id && a.status === 'active' ? { ...a, status: 'acknowledged' as const } : a));
@@ -70,8 +65,8 @@ export default function AdminView({
   });
 
   const filteredStudents = students.filter(s =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.career.toLowerCase().includes(searchQuery.toLowerCase())
+    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+    s.career.toLowerCase().includes(studentSearch.toLowerCase())
   );
 
   const SIDEBAR_ITEMS = [
@@ -87,8 +82,19 @@ export default function AdminView({
     <div className="pt-16 min-h-screen bg-surface dark:bg-zinc-950 flex flex-col md:flex-row">
 
       {/* Sidebar */}
-      <aside className="w-full md:w-60 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 p-5 flex flex-col md:min-h-[calc(100vh-64px)] justify-between">
-        <div className="space-y-6">
+      <aside className={`bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col md:min-h-[calc(100vh-64px)] transition-all duration-200 ${
+        sidebarCollapsed ? 'w-16 px-2' : 'w-full md:w-60 px-5'
+      } py-5`}>
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="w-full py-2 px-2 text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 mb-4"
+          aria-label={sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+        >
+          <List className="w-4 h-4" weight="regular" />
+          {!sidebarCollapsed && <span className="text-[10px] uppercase tracking-wider">Colapsar</span>}
+        </button>
+
+        <div className={`space-y-6 flex-1 ${sidebarCollapsed ? 'hidden' : ''}`}>
           <div>
             <p className="text-[10px] font-mono tracking-wider text-zinc-400 dark:text-zinc-500 uppercase font-bold">Administrador</p>
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white mt-1">Consola de Control</h3>
@@ -104,24 +110,71 @@ export default function AdminView({
                     : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
               >
-                <Icon className="w-4 h-4" weight={activeTab === tab ? 'fill' : 'regular'} />
+                <Icon className="w-4 h-4 flex-shrink-0" weight={activeTab === tab ? 'fill' : 'regular'} />
                 {label}
               </button>
             ))}
           </nav>
-        </div>
-        <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800 mt-5 space-y-3">
-          <div className="bg-accent-50 dark:bg-accent-950/30 p-3.5 rounded-xl text-[10px] leading-relaxed border border-accent-100 dark:border-accent-900/50">
-            <span className="font-bold text-accent-700 dark:text-accent-300 block mb-1">ESTADO HARDWARE</span>
-            <span className="w-2 h-2 rounded-full bg-green-500 inline-block mr-1.5 animate-pulse" />
-            <span className="text-zinc-500 dark:text-zinc-400">Kiosk-042 Conectado</span>
+
+          <div className="mt-5 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+            <p className="text-[9px] font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2 font-bold px-1">Herramientas</p>
+            <div className="flex flex-col gap-1">
+              <Link to="/docente/demo" className="w-full py-2.5 px-3 text-xs text-left rounded-lg font-semibold transition-all flex items-center gap-2.5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200">
+                <Cpu className="w-4 h-4 flex-shrink-0" weight="regular" />
+                Simulador de Escaneo
+              </Link>
+              <Link to="/docente/arquitectura" className="w-full py-2.5 px-3 text-xs text-left rounded-lg font-semibold transition-all flex items-center gap-2.5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200">
+                <ChartBar className="w-4 h-4 flex-shrink-0" weight="regular" />
+                Arquitectura Cloud
+              </Link>
+            </div>
           </div>
+        </div>
+
+        {/* Collapsed icon-only nav */}
+        {sidebarCollapsed && (
+          <nav className="flex flex-col gap-1">
+            {SIDEBAR_ITEMS.map(({ tab, icon: Icon }) => (
+              <button
+                key={tab}
+                onClick={() => { setActiveTab(tab); setSearchQuery(''); }}
+                title={tab === 'overview' ? 'Vista General' : tab === 'students' ? `Alumnos (${students.length})` : tab === 'logs' ? `Historial (${logs.length})` : tab === 'alerts' ? 'Alertas' : tab === 'reports' ? 'Reportes' : 'Calibración'}
+                className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === tab
+                    ? 'bg-accent-600 text-white shadow-sm'
+                    : 'text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+              >
+                <Icon className="w-5 h-5" weight={activeTab === tab ? 'fill' : 'regular'} />
+              </button>
+            ))}
+            <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-1">
+              <Link to="/docente/demo" title="Simulador de Escaneo" className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all">
+                <Cpu className="w-5 h-5" weight="regular" />
+              </Link>
+              <Link to="/docente/arquitectura" title="Arquitectura Cloud" className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all">
+                <ChartBar className="w-5 h-5" weight="regular" />
+              </Link>
+            </div>
+          </nav>
+        )}
+
+        <div className={`${sidebarCollapsed ? 'space-y-1.5 mt-auto' : 'pt-5 border-t border-zinc-100 dark:border-zinc-800 mt-5 space-y-3'}`}>
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-2 px-1" title="Kiosk-042 — Conectado">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">Kiosk-042 online</span>
+            </div>
+          )}
           <button
-            onClick={onLogout}
-            className="w-full py-2.5 px-3 text-xs text-left rounded-lg font-semibold transition-all flex items-center gap-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+            onClick={() => navigate('/')}
+            className={`rounded-lg font-semibold transition-all flex items-center gap-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 ${
+              sidebarCollapsed ? 'w-10 h-10 mx-auto justify-center py-2 px-2' : 'w-full py-2.5 px-3 text-xs text-left'
+            }`}
+            title="Cerrar sesión"
           >
-            <SignOut className="w-4 h-4" weight="regular" />
-            Cerrar sesión
+            <SignOut className="w-4 h-4 flex-shrink-0" weight="regular" />
+            {!sidebarCollapsed && 'Cerrar sesión'}
           </button>
         </div>
       </aside>
@@ -134,10 +187,10 @@ export default function AdminView({
           <div className="space-y-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Alumnos', value: registeredCount, icon: Users, accent: 'bg-accent-50 dark:bg-accent-950/30 text-accent-600 dark:text-accent-400' },
-                { label: 'Accesos Hoy', value: accessesToday, icon: SignIn, accent: 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400' },
-                { label: 'Bloqueos', value: deniedToday, icon: XCircle, accent: 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400' },
-                { label: 'Alertas', value: alertsActive, icon: ShieldWarning, accent: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400', alert: true },
+              { label: 'Alumnos', value: stats.registered, icon: Users, accent: 'bg-accent-50 dark:bg-accent-950/30 text-accent-600 dark:text-accent-400' },
+              { label: 'Accesos Hoy', value: stats.accessesToday, icon: SignIn, accent: 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400' },
+              { label: 'Bloqueos', value: stats.deniedToday, icon: XCircle, accent: 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400' },
+              { label: 'Alertas', value: stats.alertsActive, icon: ShieldWarning, accent: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400', alert: true },
               ].map(({ label, value, icon: Icon, accent, alert }) => (
                 <div key={label} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 flex items-center justify-between shadow-sm">
                   <div>
@@ -261,11 +314,22 @@ export default function AdminView({
               (() => {
                 const student = students.find(s => s.id === selectedStudentId);
                 if (!student) return null;
-                return (
+  if (showEnrollment) {
+    return (
+      <div className="pt-16 min-h-screen bg-surface dark:bg-zinc-950">
+        <EnrollmentView
+          onComplete={(student) => { handleAddStudent(student); setShowEnrollment(false); }}
+          onCancel={() => setShowEnrollment(false)}
+        />
+      </div>
+    );
+  }
+
+  return (
                   <StudentDetailView
                     student={student}
                     logs={logs}
-                    onToggleStatus={onToggleStudent}
+                    onToggleStatus={handleToggleStudent}
                     onBack={() => setSelectedStudentId(null)}
                   />
                 );
@@ -286,12 +350,16 @@ export default function AdminView({
               </button>
             </div>
 
-            {showEnrollment && (
-              <EnrollmentView
-                onComplete={(student) => { onAddStudent(student); setShowEnrollment(false); }}
-                onCancel={() => setShowEnrollment(false)}
+            <div className="relative w-full sm:max-w-xs mt-3">
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4" weight="regular" />
+              <input
+                type="text"
+                placeholder="Buscar alumno..."
+                value={studentSearch}
+                onChange={e => setStudentSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs transition-all duration-200"
               />
-            )}
+            </div>
 
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
@@ -303,7 +371,6 @@ export default function AdminView({
                       <th className="p-4">Lab</th>
                       <th className="p-4 text-center">Firma</th>
                       <th className="p-4 text-center">Permiso</th>
-                      <th className="p-4 text-center">Accion</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -331,18 +398,6 @@ export default function AdminView({
                             {student.status === 'allowed' ? 'Habilitado' : 'Suspendido'}
                           </span>
                         </td>
-                        <td className="p-4 text-center">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onToggleStudent(student.id); }}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all active:scale-[0.98] ${
-                              student.status === 'allowed'
-                                ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50'
-                                : 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/50'
-                            }`}
-                          >
-                            {student.status === 'allowed' ? 'Suspender' : 'Habilitar'}
-                          </button>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -367,11 +422,6 @@ export default function AdminView({
                   className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
                   <FileCsv className="w-4 h-4" weight="regular" />
                   Descargar CSV
-                </button>
-                <button onClick={onClearLogs}
-                  className="px-4 py-2 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
-                  <Trash className="w-4 h-4" weight="regular" />
-                  Limpiar
                 </button>
               </div>
             </div>
@@ -504,10 +554,32 @@ export default function AdminView({
                 </div>
               </div>
             </div>
+
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-4">
+              <h4 className="font-bold text-sm text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">Gestión de Datos</h4>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Eliminar todos los registros de acceso del sistema.</p>
+              <button
+                onClick={() => setConfirmOpen(true)}
+                className="px-4 py-2 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200"
+              >
+                <Trash className="w-4 h-4" weight="regular" />
+                Limpiar historial de accesos
+              </button>
+            </div>
           </div>
         )}
 
       </main>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Limpiar historial"
+        message="¿Estás seguro? Esta acción eliminará todos los registros permanentemente y no se puede deshacer."
+        confirmLabel="Limpiar todo"
+        variant="danger"
+        onConfirm={() => { handleClearLogs(); setConfirmOpen(false); }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

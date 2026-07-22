@@ -1,251 +1,209 @@
-# Documentación del Pipeline CI/CD - FaceAccess Lab
-
-## 1. Información General del Proyecto
-
-| Campo | Descripción |
-|-------|-------------|
-| **Nombre del Proyecto** | FaceAccess Lab |
-| **Framework** | React 19 |
-| **Lenguaje** | TypeScript 5.8 |
-| **Build Tool** | Vite 6 |
-| **Framework de Estilos** | TailwindCSS 4 |
-| **Gestor de Paquetes** | pnpm |
-| **Runtime** | Node.js 20 |
-| **Repositorio** | GitHub |
-| **Plataforma de Despliegue** | Vercel |
-| **Archivo de Pipeline** | `.github/workflows/ci-cd.yml` |
+# Documentación del Pipeline CI/CD — FaceAccess Lab
 
 ---
 
-## 2. Arquitectura del Pipeline CI/CD
+## 1. Información general
 
-### 2.1 Diagrama del Flujo
+| Campo | Valor |
+|-------|-------|
+| **Proyecto** | FaceAccess Lab |
+| **Framework** | React 19 |
+| **Lenguaje** | TypeScript 5.8 |
+| **Build tool** | Vite 6 |
+| **Estilos** | TailwindCSS 4 |
+| **Gestor de paquetes** | pnpm 9 |
+| **Runtime** | Node.js 22 LTS |
+| **Repositorio** | https://github.com/Ismael-1105/proyecto-septimo-ciclo-nube |
+| **Rama principal** | `main` |
+| **Plataforma de despliegue** | Vercel |
+| **Archivo del pipeline** | `.github/workflows/ci-cd.yml` |
+
+---
+
+## 2. Herramientas utilizadas
+
+### 2.1 GitHub Actions
+
+| Acción oficial | Versión | Función |
+|----------------|---------|---------|
+| `actions/checkout` | v4 | Descarga el repositorio en el runner |
+| `pnpm/action-setup` | v4 | Instala pnpm con versión controlada |
+| `actions/setup-node` | v4 | Configura Node.js con cache nativo de pnpm |
+| `actions/upload-artifact` | v4 | Sube el build como artefacto descargable |
+
+### 2.2 Stack de desarrollo
+
+| Herramienta | Versión | Uso en CI |
+|-------------|---------|-----------|
+| Node.js | 22 LTS | Runtime del runner |
+| pnpm | 9 | Gestor de paquetes con `--frozen-lockfile` |
+| TypeScript | 5.8 | `tsc --noEmit` — verificación de tipos |
+| ESLint | 9.x | `eslint src` — análisis estático |
+| Vitest | 3.x | `vitest run` — pruebas unitarias |
+| Vite | 6.x | `vite build` — compilación a producción |
+| Vercel CLI | latest | `vercel deploy --prod` — despliegue |
+
+---
+
+## 3. Estructura del pipeline
+
+```
+.github/workflows/ci-cd.yml
+├── triggers: push a main, pull_request a main
+│
+├── job: ci (Continuous Integration)
+│   ├── Checkout
+│   ├── Setup pnpm 9
+│   ├── Setup Node.js 22 (cache: pnpm)
+│   ├── pnpm install --frozen-lockfile
+│   ├── TypeScript check
+│   ├── ESLint
+│   ├── Tests (Vitest)
+│   ├── Build (Vite)
+│   ├── Verify dist/index.html
+│   └── Upload artifact (vercel-build, 7 días)
+│
+└── job: deploy (Continuous Deployment)
+    ├── needs: ci
+    ├── condition: push a main (no PR)
+    ├── environment: production
+    ├── Checkout
+    ├── Setup pnpm 9
+    ├── Setup Node.js 22 (cache: pnpm)
+    ├── pnpm install --frozen-lockfile
+    └── npx vercel deploy --prod
+```
+
+---
+
+## 4. Diagrama del flujo CI/CD
 
 ```mermaid
 flowchart TD
-    A([Push a main]) -->|Trigger| I[CI Job]
-    B([PR a main]) -->|Trigger| I[CI Job]
-    
-    I --> C[Checkout]
-    C --> D[Setup Node.js 20]
-    D --> E[Install pnpm]
-    E --> F[pnpm Cache]
-    F --> G[Install Dependencies]
-    G --> H[Typecheck]
-    H -->|Error| X([Pipeline Fallido])
-    H -->|OK| I2[ESLint]
-    I2 -->|Error| X
-    I2 -->|OK| J[Run Tests]
-    J -->|No tests| K[Build Vite]
-    J -->|Tests| J2[Vitest]
-    J2 -->|Pass| K
-    J2 -->|Fail| X
-    K -->|Error| X
-    K --> L[Verify dist/]
-    L -->|Not found| X
-    L -->|OK| M[Upload Artifact]
-    
-    M --> N{Evento = Push a main?}
-    N -->|No PR| O([Artifact Disponible])
-    N -->|Sí| P[Deploy Job]
-    
-    P --> Q[Download Artifact]
-    Q --> R[Deploy to Vercel]
-    R --> S([✅ Deploy Exitoso])
-    
-    style X fill:#ff6b6b,color:#fff
-    style S fill:#51cf66,color:#fff
-    style O fill:#748ffc,color:#fff
-```
+    subgraph Triggers
+        A[Push a main]
+        B[Pull Request a main]
+    end
 
-### 2.2 Jobs Definidos
+    A --> CI
+    B --> CI
 
-| Job | Nombre | Propósito | Trigger |
-|-----|--------|-----------|---------|
-| `ci` | Continuous Integration | Validar, verificar y construir el proyecto | push/PR a main |
-| `deploy` | Deploy to Vercel | Desplegar a producción | Solo push a main |
+    subgraph CI[Job: CI]
+        C1[Checkout] --> C2[Setup pnpm 9]
+        C2 --> C3[Setup Node.js 22]
+        C3 --> C4[pnpm install --frozen-lockfile]
+        C4 --> C5[TypeScript check]
+        C5 -->|Error| FAIL
+        C5 -->|OK| C6[ESLint]
+        C6 -->|Error| FAIL
+        C6 -->|OK| C7[Tests - Vitest]
+        C7 -->|Error| FAIL
+        C7 -->|OK| C8[Build - Vite]
+        C8 -->|Error| FAIL
+        C8 -->|OK| C9[Verify dist/index.html]
+        C9 -->|Not found| FAIL
+        C9 -->|OK| C10[Upload artifact]
+    end
 
----
+    C10 --> CHECK{Es push a main?}
 
-## 3. Herramientas y Tecnologías Utilizadas
+    CHECK -->|No| DONE([Pipeline exitoso - Solo CI])
+    CHECK -->|Sí| DEPLOY
 
-### 3.1 GitHub Actions
+    subgraph DEPLOY[Job: Deploy]
+        D1[Checkout] --> D2[Setup pnpm 9]
+        D2 --> D3[Setup Node.js 22]
+        D3 --> D4[pnpm install --frozen-lockfile]
+        D4 --> D5[vercel deploy --prod]
+        D5 --> LIVE([Despliegue en producción])
+    end
 
-| Componente | Versión | Propósito |
-|-----------|---------|-----------|
-| `actions/checkout` | v4 | Checkout del código fuente |
-| `actions/setup-node` | v4 | Configuración de Node.js |
-| `actions/cache` | v4 | Cache de dependencias pnpm |
-| `actions/upload-artifact` | v4 | Subida de artefactos de build |
-| `actions/download-artifact` | v4 | Descarga de artefactos |
-| `actions/github-script` | v7 | Comentarios automáticos en PRs |
-
-### 3.2 Herramientas de Desarrollo
-
-| Herramienta | Versión | Propósito |
-|-------------|---------|-----------|
-| Node.js | 20 | Runtime de JavaScript |
-| pnpm | 9 | Gestor de paquetes |
-| TypeScript | 5.8 | Verificación de tipos |
-| ESLint | 9.x | Análisis estático de código |
-| Vitest | 3.x | Framework de pruebas |
-| Vite | 6.x | Bundler y build tool |
-| Vercel CLI | 56.x | Despliegue a producción |
-
----
-
-## 4. Estructura del Pipeline
-
-### 4.1 Job: CI (Continuous Integration)
-
-```yaml
-ci:
-  name: Continuous Integration
-  runs-on: ubuntu-latest
-```
-
-#### Etapas del Job CI
-
-| # | Etapa | Acción | Descripción |
-|---|-------|--------|-------------|
-| 1 | Checkout | `actions/checkout@v4` | Descarga el código del repositorio |
-| 2 | Setup Node.js | `actions/setup-node@v4` | Configura Node.js 20 con cache de pnpm |
-| 3 | Install pnpm | `npm install -g pnpm@9` | Instala pnpm globalmente |
-| 4 | pnpm Cache | `actions/cache@v4` | Cachea el store de pnpm para acelerar instalaciones |
-| 5 | Install Dependencies | `pnpm install --no-frozen-lockfile` | Instala todas las dependencias del proyecto |
-| 6 | TypeScript Check | `pnpm typecheck` | Valida tipos de TypeScript sin emitir archivos |
-| 7 | ESLint | `pnpm lint` | Analiza código en busca de errores y warnings |
-| 8 | Tests | `pnpm test` | Ejecuta pruebas unitarias (opcional si no existen) |
-| 9 | Build | `pnpm build` | Compila la aplicación con Vite |
-| 10 | Verify Build | Verificación manual | Confirma que `dist/` existe con `index.html` |
-| 11 | Upload Artifact | `actions/upload-artifact@v4` | Sube el build como artefacto |
-
-### 4.2 Job: Deploy
-
-```yaml
-deploy:
-  name: Deploy to Vercel
-  needs: ci
-  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  runs-on: ubuntu-latest
-  environment: production
-```
-
-#### Etapas del Job Deploy
-
-| # | Etapa | Acción | Descripción |
-|---|-------|--------|-------------|
-| 1 | Checkout | `actions/checkout@v4` | Descarga código para deploy |
-| 2 | Setup Node.js | `actions/setup-node@v4` | Configura Node.js 20 |
-| 3 | Install pnpm | `npm install -g pnpm@9` | Instala pnpm |
-| 4 | Install Dependencies | `pnpm install --no-frozen-lockfile` | Instala dependencias |
-| 5 | Download Artifact | `actions/download-artifact@v4` | Descarga build pre-generado |
-| 6 | Deploy to Vercel | `vercel deploy --prebuilt --prod` | Despliega a producción |
-| 7 | Comment PR | `actions/github-script@v7` | Commenta URL en PR (si aplica) |
-
----
-
-## 5. Variables de Entorno y Secrets
-
-### 5.1 Variables de Entorno del Pipeline
-
-| Variable | Valor | Descripción |
-|----------|-------|-------------|
-| `NODE_VERSION` | `'20'` | Versión de Node.js |
-| `PNPM_VERSION` | `'9'` | Versión de pnpm |
-
-### 5.2 Secrets Configurados
-
-| Secret | Descripción | Cómo obtenerlo |
-|--------|-------------|----------------|
-| `VERCEL_TOKEN` | Token de API de Vercel | `vercel tokens create` |
-| `VERCEL_ORG_ID` | ID de organización Vercel | `vercel project ls` |
-| `VERCEL_PROJECT_ID` | ID del proyecto Vercel | Dashboard de Vercel |
-| `GEMINI_API_KEY` | API key de Google Gemini | Google AI Studio |
-
-### 5.3 Configuración de Secrets en GitHub
-
-```
-GitHub Repository → Settings → Secrets and variables → Actions → New repository secret
+    style FAIL fill:#ff6b6b,color:#fff
+    style LIVE fill:#51cf66,color:#fff
+    style DONE fill:#748ffc,color:#fff
 ```
 
 ---
 
-## 6. Triggers del Pipeline
+## 5. Descripción detallada de cada etapa
 
-| Evento | Rama | Job Ejecutado |
-|--------|------|---------------|
-| Push | `main` | CI + Deploy |
-| Pull Request | `main` | Solo CI |
+### Job: CI
+
+| # | Etapa | Comando / Acción | Qué hace y por qué |
+|---|-------|-----------------|-------------------|
+| 1 | Checkout | `actions/checkout@v4` | Clona el código fuente del repositorio en el runner efímero de Ubuntu. |
+| 2 | Setup pnpm | `pnpm/action-setup@v4` (version: 9) | Instala pnpm 9. Se pineó a v9 porque pnpm 11+ requiere Node ≥22.13 y usa `node:sqlite`, módulo no disponible en Node 22.0–22.12. |
+| 3 | Setup Node.js | `actions/setup-node@v4` (22, cache: pnpm) | Configura Node.js 22 LTS. El parámetro `cache: pnpm` habilita el cache nativo del store de pnpm, eliminando la necesidad de `actions/cache`. |
+| 4 | Install | `pnpm install --frozen-lockfile` | Instala dependencias de forma determinista. `--frozen-lockfile` garantiza que el lockfile no se modifique en CI. Si hay cambios en `package.json` sin actualizar el lockfile, el pipeline falla intencionalmente. |
+| 5 | TypeScript | `pnpm typecheck` → `tsc --noEmit` | Verifica todos los tipos del proyecto. No emite archivos, solo valida. Detecta errores de tipado antes de llegar a producción. |
+| 6 | ESLint | `pnpm lint` → `eslint src` | Análisis estático de código. Reglas activas: hooks de React, React Refresh, no-console. Variables no usadas están como `off` para evitar fallos por imports de desarrollo. |
+| 7 | Tests | `vitest run` (condicional) | Ejecuta pruebas solo si existen archivos `.test.*` o `.spec.*` en `src/`. Si no hay tests, muestra "No test files found, skipping" sin fallar. |
+| 8 | Build | `pnpm build` → `vite build` | Compila la aplicación con Vite 6. Genera la carpeta `dist/` con HTML, JS y CSS optimizados. |
+| 9 | Verify | `test -f dist/index.html` | Verifica que el build generó correctamente `dist/index.html`. Si no existe, el pipeline falla inmediatamente. |
+| 10 | Artifact | `actions/upload-artifact@v4` | Sube `dist/` como artefacto `vercel-build` disponible por 7 días para descarga manual o debugging. |
+
+### Job: Deploy
+
+| # | Etapa | Comando / Acción | Qué hace y por qué |
+|---|-------|-----------------|-------------------|
+| 1 | Checkout | `actions/checkout@v4` | Clona el repositorio (necesario porque `vercel.json` y el código fuente deben estar presentes para que Vercel ejecute su build). |
+| 2 | Setup pnpm | `pnpm/action-setup@v4` (version: 9) | Instala pnpm para que Vercel pueda ejecutar `pnpm install` y `pnpm build` según `vercel.json`. |
+| 3 | Setup Node.js | `actions/setup-node@v4` (22, cache: pnpm) | Configura Node.js con cache de pnpm para acelerar la instalación de dependencias en el deploy. |
+| 4 | Install | `pnpm install --frozen-lockfile` | Instala dependencias localmente. Vercel CLI necesita que el proyecto pueda resolverse antes de iniciar su propio build. |
+| 5 | Deploy | `npx vercel@latest deploy --prod --token=***` | Despliega a producción. Vercel lee `vercel.json`, ejecuta `pnpm build` y publica el resultado. `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` se pasan como variables de entorno para identificar el proyecto. |
 
 ---
 
-## 7. Scripts de Package.json
+## 6. Configuración de calidad y seguridad
 
-```json
-{
-  "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
-    "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
-  }
-}
-```
-
----
-
-## 8. Configuración de ESLint
+### 6.1 ESLint
 
 ```javascript
-// eslint.config.js
-import js from '@eslint/js';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
-import globals from 'globals';
-
+// eslint.config.js — ESLint 9 con flat config
 export default tseslint.config(
   { ignores: ['dist', 'node_modules', '.vite'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
-    languageOptions: { ecmaVersion: 2022, globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 );
 ```
 
-### Reglas Habilitadas
+| Regla | Nivel | Propósito |
+|-------|-------|-----------|
+| `react-hooks/exhaustive-deps` | Error | Previene bugs por dependencias incorrectas en hooks |
+| `react-refresh/only-export-components` | Warn | Compatibilidad con HMR de Vite |
+| `no-console` | Warn | Evita logs en producción (permite `warn` y `error`) |
+| `@typescript-eslint/*` | Recomendado | Buenas prácticas de TypeScript |
 
-| Regla | Nivel | Descripción |
-|-------|-------|-------------|
-| `react-hooks/exhaustive-deps` | Error | Verifica dependencias de hooks |
-| `react-refresh/only-export-components` | Warn | Previene errores de fast refresh |
-| `no-console` | Warn | Limita uso de console.log |
-| `@typescript-eslint/no-unused-vars` | Off | Permite vars no usadas |
+### 6.2 TypeScript
 
----
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true
+  }
+}
+```
 
-## 9. Configuración de Vitest
+El comando `tsc --noEmit` verifica todos los tipos sin generar archivos. Es la primera barrera de calidad en el pipeline.
+
+### 6.3 Vitest
 
 ```typescript
 // vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -253,240 +211,144 @@ export default defineConfig({
     globals: true,
     coverage: { provider: 'v8', reporter: ['text', 'json', 'html'] },
   },
-  resolve: { alias: { '@': path.resolve(__dirname, '.') } },
 });
 ```
 
+El pipeline ejecuta Vitest con `jsdom` como entorno. El paso es condicional: si no existen archivos de prueba, se omite sin fallar. Cuando se agreguen tests, se ejecutarán automáticamente.
+
 ---
 
-## 10. Flujo de Ejecución Completo
+## 7. Gestión de secretos
 
-### 10.1 Flujo para Push a main
+Los siguientes secrets deben configurarse en **GitHub → Settings → Secrets and variables → Actions**:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 1. DEVELOPER REALIZA PUSH                                  │
-│    git push origin main                                     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 2. GITHUB ACTIONS RECIBE EVENTO                             │
-│    Trigger: push → branch: main                              │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 3. JOB: CI (Continuous Integration)                        │
-│                                                             │
-│    ✓ Checkout del repositorio                               │
-│    ✓ Setup Node.js 20                                       │
-│    ✓ Install pnpm 9                                         │
-│    ✓ Cache de pnpm store                                    │
-│    ✓ Install dependencies                                   │
-│    ✓ TypeScript: tsc --noEmit                               │
-│    ✓ ESLint: Análisis estático                              │
-│    ✓ Tests: vitest run (si existen)                        │
-│    ✓ Build: vite build                                      │
-│    ✓ Verify: dist/ existe                                   │
-│    ✓ Upload Artifact: vercel-build                          │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 4. JOB: DEPLOY (solo si push a main)                       │
-│                                                             │
-│    ✓ Download Artifact                                     │
-│    ✓ Deploy to Vercel --prebuilt --prod                    │
-│    ✓ Variables de entorno configuradas                     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 5. VERIFICATION                                            │
-│    - GitHub Actions: ✓ Green                                │
-│    - Artifact: vercel-build disponible                      │
-│    - Vercel Dashboard: Nueva URL de producción              │
-└─────────────────────────────────────────────────────────────┘
-```
+| Secret | Descripción | Comando para obtenerlo |
+|--------|-------------|----------------------|
+| `VERCEL_TOKEN` | Token de API de Vercel | `vercel tokens create` |
+| `VERCEL_ORG_ID` | ID de la organización en Vercel | `cat .vercel/project.json` |
+| `VERCEL_PROJECT_ID` | ID del proyecto en Vercel | `cat .vercel/project.json` |
 
-### 10.2 Flujo para Pull Request
+Las variables de entorno de la aplicación (como `GEMINI_API_KEY`) se administran exclusivamente desde **Vercel Dashboard → Settings → Environment Variables**, no desde el pipeline. Esto evita que valores sensibles aparezcan en los logs de GitHub Actions.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ 1. DEVELOPER ABRE PR                                       │
-│    Pull request → main                                     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 2. GITHUB ACTIONS RECIBE EVENTO                             │
-│    Trigger: pull_request → branch: main                     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 3. JOB: CI SOLAMENTE                                       │
-│    (Deploy NO se ejecuta)                                  │
-│                                                             │
-│    ✓ Mismos pasos que push                                  │
-│    ✓ Artifact generado                                     │
-│    ✓ Comment automático en PR                              │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 4. VERIFICATION                                            │
-│    - CI Status en PR: Pass/Fail                            │
-│    - Artifact disponible para descarga                     │
-│    - Deployment URL en comentario                          │
-└─────────────────────────────────────────────────────────────┘
+---
+
+## 8. Triggers del pipeline
+
+| Evento | Rama | Jobs ejecutados |
+|--------|------|----------------|
+| `push` | `main` | CI → Deploy |
+| `pull_request` | hacia `main` | Solo CI |
+
+El deploy solo se dispara en push a `main`. Los PRs ejecutan únicamente validaciones, protegiendo la rama de producción.
+
+---
+
+## 9. Proceso de despliegue
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant GA as GitHub Actions
+    participant VC as Vercel
+
+    Dev->>GH: git push origin main
+    GH->>GA: Trigger push event
+    GA->>GA: CI Job: typecheck, lint, test, build
+    GA->>GA: Verify dist/index.html
+    GA->>GA: Upload artifact
+    GA->>VC: vercel deploy --prod
+    VC->>VC: pnpm install + pnpm build
+    VC->>VC: Deploy to CDN
+    VC-->>GA: URL de producción
+    GA-->>Dev: Pipeline exitoso
 ```
 
 ---
 
-## 11. Beneficios del Pipeline Implementado
+## 10. Evidencias solicitadas
 
-| Beneficio | Descripción |
-|-----------|-------------|
-| **Automatización** | No requiere intervención manual |
-| **Consistencia** | Mismo proceso en cada commit |
-| **Velocidad** | Cache de dependencias acelera ejecuciones |
-| **Calidad** | Validaciones de TypeScript y ESLint |
-| **Trazabilidad** | Artefactos disponibles por 7 días |
-| **Despliegue Seguro** | Solo en push a main, no en PRs |
-| **Feedback Rápido** | Comentarios automáticos en PRs |
+### 10.1 Capturas de configuración del pipeline
+
+> 📸 **Instrucción:** Toma captura de:
+> - `Settings → Secrets and variables → Actions` mostrando los 3 secrets configurados
+> - `Actions → CI/CD Pipeline → [último run]` mostrando el estado verde
+> - `Actions → CI/CD Pipeline → [run] → CI job` expandido mostrando todas las etapas ✓
+
+### 10.2 Evidencia de ejecución satisfactoria
+
+> 📸 **Instrucción:** Toma captura de cada etapa del CI job:
+> - TypeScript check ✓
+> - Lint ✓
+> - Test ✓
+> - Build ✓
+> - Verify build output ✓
+> - Upload artifact ✓
+
+### 10.3 Captura del despliegue final
+
+> 📸 **Instrucción:** Toma captura de:
+> - `Vercel Dashboard → Deployments → [último deployment]` con estado "Ready"
+> - La URL de producción abierta en el navegador
 
 ---
 
-## 12. Comandos para Gestión Local
-
-### Instalación y Desarrollo
+## 11. Comandos útiles
 
 ```bash
-# Instalar dependencias
-pnpm install
+# Ejecutar pipeline completo localmente (simulación)
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
 
-# Desarrollo local
-pnpm dev
+# Desplegar manualmente
+npx vercel deploy --prod
 
-# Compilar para producción
-pnpm build
-```
+# Ver logs del pipeline
+gh run view --log
 
-### Validaciones
-
-```bash
-# Verificación de tipos
-pnpm typecheck
-
-# Análisis de código
-pnpm lint
-
-# Pruebas unitarias
-pnpm test
-
-# Coverage de pruebas
-pnpm test:coverage
-```
-
-### Despliegue Manual
-
-```bash
-# Instalar Vercel CLI
-npm install -g vercel
-
-# Desplegar a producción
-vercel deploy --prebuilt --prod \
-  --token=YOUR_VERCEL_TOKEN \
-  --env GEMINI_API_KEY=YOUR_KEY
+# Re-ejecutar un workflow fallido
+gh run rerun <run-id>
 ```
 
 ---
 
-## 13. Verificación del Pipeline
+## 12. Problemas resueltos durante la implementación
 
-### Desde GitHub Actions
-
-1. Ir a **Actions** en el repositorio
-2. Seleccionar **CI/CD Pipeline**
-3. Verificar estado de cada job
-4. Revisar logs de cada paso
-
-### Descargar Artefacto
-
-1. Ir a **Actions** → Job completado
-2. Buscar **Artifacts** → **vercel-build**
-3. Descargar y verificar contenido
-
-### Verificar Despliegue
-
-1. Acceder a **Vercel Dashboard**
-2. Revisar **Deployments**
-3. Verificar URL de producción
+| Problema | Causa | Solución |
+|----------|-------|----------|
+| `node:sqlite` not found | pnpm 11 requiere Node ≥22.13 | Pinear `pnpm/action-setup@v4` con `version: 9` |
+| Node 20 descargado en vez de 22 | Variable de entorno no resolvía | Hardcodear `node-version: 22` |
+| Cache manual complejo | `actions/cache` manual para store de pnpm | Usar `cache: pnpm` nativo de `setup-node` |
+| `--env GEMINI_API_KEY` en logs | Secret visible en CLI | Administrar env vars desde Vercel Dashboard |
+| `--prebuilt` sin `.vercel/output` | Vite genera `dist/`, no `.vercel/output` | Usar `vercel deploy --prod` sin `--prebuilt` |
+| Lockfile desactualizado | Nuevas dependencias sin commitear el lockfile | Ejecutar `pnpm install` local y commitear |
+| Step "Comment PR" nunca ejecutado | Deploy solo corre en push, step verificaba PR | Eliminar código muerto |
 
 ---
 
-## 14. Capturas de Configuración (Guía)
+## 13. Paquetes añadidos al proyecto
 
-### A. Secrets en GitHub
-
-```
-Settings → Secrets and variables → Actions → New repository secret
-```
-
-### B. Pipeline Status
-
-```
-Actions → CI/CD Pipeline → [Run más reciente] → ✓ verde
-```
-
-### C. Artifact
-
-```
-Actions → CI/CD Pipeline → Run → Artifacts → vercel-build
-```
-
-### D. Vercel Dashboard
-
-```
-vercel.com/dashboard → Projects → faceaccess-lab → Deployments
-```
+| Paquete | Versión | Propósito |
+|---------|---------|-----------|
+| `eslint` | ^9.0.0 | Linter |
+| `@eslint/js` | ^9.0.0 | Config base ESLint 9 |
+| `typescript-eslint` | ^8.0.0 | Reglas TS para ESLint |
+| `eslint-plugin-react-hooks` | ^5.0.0 | Reglas de hooks de React |
+| `eslint-plugin-react-refresh` | ^0.4.0 | Fast refresh con Vite |
+| `globals` | ^15.0.0 | Definiciones de globales |
+| `vitest` | ^3.0.0 | Framework de testing |
+| `@vitest/coverage-v8` | ^3.0.0 | Cobertura para Vitest |
+| `@types/react` | ^19.0.0 | Tipos de React |
+| `@types/react-dom` | ^19.0.0 | Tipos de React DOM |
 
 ---
 
-## 15. Información del Repositorio
+## 14. Conclusión
 
-| Campo | Valor |
-|-------|-------|
-| **Repositorio** | https://github.com/[owner]/[repo] |
-| **Rama Principal** | main |
-| **Archivo de Pipeline** | `.github/workflows/ci-cd.yml` |
-| **Artifact Name** | vercel-build |
-| **Retention** | 7 días |
+El pipeline CI/CD implementado automatiza completamente el ciclo de integración y despliegue del proyecto FaceAccess Lab:
 
----
-
-## 16. Conclusiones
-
-El pipeline CI/CD implementado automatiza completamente el proceso de integración y despliegue del proyecto FaceAccess Lab. Las principales características son:
-
-1. **Integración Continua (CI)**: Validación automática de código en cada push y pull request
-2. **Despliegue Continuo (CD)**: Entrega automática a producción solo en push a main
-3. **Cache Inteligente**: Optimización de tiempo mediante cache de pnpm
-4. **Validaciones Múltiples**: TypeScript, ESLint y build verification
-5. **Seguridad**: Secrets gestionados correctamente en GitHub
-6. **Feedback**: Comentarios automáticos en pull requests
-
-Este pipeline garantiza que el código desplegado siempre ha pasado por un proceso de validación robusto, reduciendo errores y asegurando calidad en producción.
-
----
-
-## 17. Referencias
-
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Vercel CLI Documentation](https://vercel.com/docs/cli)
-- [pnpm Documentation](https://pnpm.io/)
-- [ESLint Configuration](https://eslint.org/docs/user-guide/configuring/)
-- [Vitest Documentation](https://vitest.dev/)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- **Integración Continua:** Cada push y PR activa typecheck, lint, test y build. Si cualquier etapa falla, el pipeline se detiene inmediatamente.
+- **Despliegue Continuo:** Solo en push a `main`, el código validado se despliega automáticamente a Vercel.
+- **Calidad de código:** ESLint + TypeScript actúan como barreras de calidad antes del build.
+- **Seguridad:** Secrets gestionados en GitHub, variables de entorno en Vercel Dashboard.
+- **Velocidad:** Cache nativo de pnpm en `setup-node` acelera las ejecuciones.
+- **Trazabilidad:** Artefactos de build disponibles por 7 días para auditoría.
