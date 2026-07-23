@@ -73,7 +73,7 @@ export default function ForgotPasswordView() {
               </div>
               <button
                 onClick={() => navigate('/login')}
-                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-accent-600 dark:text-accent-400 hover:underline transition-all"
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-accent-600 dark:text-accent-400 hover:underline transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" weight="bold" />
                 Volver al inicio de sesión
@@ -110,15 +110,15 @@ export default function ForgotPasswordView() {
 
               <button
                 type="submit"
-                className="w-full bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-sm transition-all"
+                className="w-full bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-sm transition-all cursor-pointer"
               >
                 Enviar enlace
               </button>
 
-              <button
+<button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all"
+                className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" weight="bold" />
                 Volver al inicio de sesión

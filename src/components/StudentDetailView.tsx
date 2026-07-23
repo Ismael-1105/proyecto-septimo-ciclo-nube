@@ -173,7 +173,7 @@ export default function StudentDetailView({ student, logs, onToggleStatus, onBac
       {/* ── Breadcrumb ── */}
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors focus-visible:outline-2 focus-visible:outline-accent-500 rounded-md px-1 py-0.5 -ml-1"
+        className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors focus-visible:outline-2 focus-visible:outline-accent-500 rounded-md px-1 py-0.5 -ml-1 cursor-pointer"
         aria-label="Volver al listado de alumnos"
       >
         <ArrowLeft className="w-3.5 h-3.5" weight="bold" />
@@ -184,7 +184,6 @@ export default function StudentDetailView({ student, logs, onToggleStatus, onBac
           PROFILE HEADER — 2 columnas en desktop
           ══════════════════════════════════════════ */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="h-3 bg-gradient-to-r from-accent-600 to-accent-800" />
         <div className="px-6 pb-5 pt-5">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
             {/* Avatar */}
@@ -238,7 +237,7 @@ export default function StudentDetailView({ student, logs, onToggleStatus, onBac
               <StatusIndicator status={student.status} />
               <button
                 onClick={() => setConfirmOpen(true)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] inline-flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-accent-500 ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] inline-flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-accent-500 cursor-pointer ${
                   student.status === 'allowed'
                     ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/40'
                     : 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/50 border border-green-200 dark:border-green-800/40'
@@ -340,11 +339,11 @@ export default function StudentDetailView({ student, logs, onToggleStatus, onBac
                 <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
                   Pág. {page + 1} de {totalPages}
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPage(p => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-zinc-500 dark:text-zinc-400"
+                    className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-zinc-500 dark:text-zinc-400"
                     aria-label="Página anterior"
                   >
                     <CaretLeft className="w-3.5 h-3.5" weight="bold" />
@@ -353,7 +352,7 @@ export default function StudentDetailView({ student, logs, onToggleStatus, onBac
                     <button
                       key={i}
                       onClick={() => setPage(i)}
-                      className={`w-7 h-7 rounded-xl text-[10px] font-bold transition-all ${
+                      className={`w-7 h-7 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
                         page === i
                           ? 'bg-accent-600 text-white'
                           : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -367,7 +366,7 @@ export default function StudentDetailView({ student, logs, onToggleStatus, onBac
                   <button
                     onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                     disabled={page === totalPages - 1}
-                    className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-zinc-500 dark:text-zinc-400"
+                    className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-zinc-500 dark:text-zinc-400"
                     aria-label="Página siguiente"
                   >
                     <CaretRight className="w-3.5 h-3.5" weight="bold" />

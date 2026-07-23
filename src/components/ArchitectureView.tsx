@@ -112,7 +112,7 @@ export default function ArchitectureView() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                     activeCategory === cat.id
                       ? 'bg-white text-zinc-900 shadow-sm'
                       : 'text-zinc-400 hover:text-zinc-300'
@@ -136,7 +136,7 @@ export default function ArchitectureView() {
                 <button
                   key={srv.id}
                   onClick={() => setSelectedService(srv)}
-                  className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between gap-4 ${
+                  className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between gap-4 cursor-pointer ${
                     isSelected
                       ? 'bg-white text-zinc-900 border-white shadow-xl shadow-white/5 -translate-y-1'
                       : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-600 hover:-translate-y-0.5'

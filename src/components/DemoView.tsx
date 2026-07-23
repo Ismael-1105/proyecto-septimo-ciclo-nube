@@ -28,7 +28,6 @@ export default function DemoView() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [simulatedMatchPct, setSimulatedMatchPct] = useState(99.8);
   const [lockCountdown, setLockCountdown] = useState(10);
-  const [activeDots, setActiveDots] = useState<{ x: number; y: number }[]>([]);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -66,21 +65,6 @@ export default function DemoView() {
     }
     return () => { stopWebcam(); };
   }, [useWebcam, flowState]);
-
-  useEffect(() => {
-    if (flowState === 'scanning' || flowState === 'processing') {
-      const interval = setInterval(() => {
-        const dots = Array.from({ length: 6 }).map(() => ({
-          x: Math.floor(Math.random() * 80) + 10,
-          y: Math.floor(Math.random() * 80) + 10
-        }));
-        setActiveDots(dots);
-      }, 900);
-      return () => clearInterval(interval);
-    } else {
-      setActiveDots([]);
-    }
-  }, [flowState]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -228,7 +212,7 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
 
           {/* LEFT: Camera view */}
           <div className="md:col-span-7 flex flex-col">
-            <div className="relative bg-zinc-900 rounded-2xl overflow-hidden flex-1 min-h-[360px] md:min-h-[440px] border border-zinc-800 shadow-2xl flex flex-col justify-between">
+            <div className="relative bg-zinc-900 rounded-2xl overflow-hidden flex-1 min-h-[360px] md:min-h-[440px] border border-zinc-800 shadow-xl flex flex-col justify-between">
               <div className="absolute inset-0 z-0">
                 {flowState === 'idle' ? (
                   <div className="w-full h-full relative">
@@ -246,19 +230,17 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                     autoPlay
                     playsInline
                     muted
-                    className="w-full h-full object-cover scale-x-[-1] opacity-70"
+                    className="w-full h-full object-cover scale-x-[-1] opacity-70 cursor-crosshair"
                   />
-                ) : (
-                  <div className="w-full h-full relative">
+) : (
+                  <div className="w-full h-full relative cursor-crosshair">
                     <img
-                      className="w-full h-full object-cover opacity-75"
-                      alt="Student biometric scanning"
-                      src={selectedStudent.photoUrl}
+                      className="w-full h-full object-cover opacity-40 filter blur-[1px]"
+                      alt="Lab corridor camera feed"
+                      src="/images/camera-feed-bg.jpg"
                       onError={(e) => { e.currentTarget.src = '/images/camera-feed-bg.jpg'; }}
                     />
-                    {selectedStudent.id !== 'student-ismael' && selectedStudent.id !== 'student-unknown' && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 to-transparent" />
-                    )}
+                    <div className="absolute inset-0 bg-accent-950/10 mix-blend-color" />
                   </div>
                 )}
               </div>
@@ -266,17 +248,9 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
               {/* HUD overlays */}
               <div className="relative z-10 p-5 flex flex-col justify-between h-full pointer-events-none">
                 <div className="flex justify-between items-start">
-                  <div className="flex flex-col gap-1">
-                    <span className="bg-zinc-950/90 text-white text-[9px] font-mono tracking-widest px-2.5 py-1 rounded-lg uppercase backdrop-blur">
-                      Feed Real-Time // 001
-                    </span>
-                    <span className="bg-zinc-900/80 text-[9px] text-zinc-400 font-mono px-2.5 py-1 rounded-lg backdrop-blur border border-zinc-800/50">
-                      ISO: 400 | SHUTTER: 1/120 | LENS: F1.8
-                    </span>
-                  </div>
-                  <div className="bg-zinc-900/80 text-[9px] text-accent-400 font-mono px-3 py-1 rounded-lg backdrop-blur border border-zinc-800/50">
-                    SIM_NODE_K042
-                  </div>
+                  <span className="bg-zinc-950/90 text-white text-[9px] font-mono tracking-widest px-2.5 py-1 rounded-lg uppercase backdrop-blur">
+                    Feed Real-Time // 001
+                  </span>
                 </div>
 
                 {(flowState === 'scanning' || flowState === 'processing') && (
@@ -291,16 +265,6 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                       className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-60"
                       onError={(e) => { e.currentTarget.src = '/images/camera-feed-bg.jpg'; }}
                     />
-                    {activeDots.map((dot, index) => (
-                      <span
-                        key={index}
-                        style={{ left: `${dot.x}%`, top: `${dot.y}%` }}
-                        className="absolute w-1 h-1 bg-accent-300 rounded-full animate-ping"
-                      />
-                    ))}
-                    <span className="text-[10px] text-white/30 font-mono tracking-widest uppercase z-10">
-                      Deteccion Activa
-                    </span>
                   </div>
                 )}
 
@@ -445,7 +409,7 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                     {flowState === 'idle' && (
                       <button
                         onClick={() => setUseWebcam(!useWebcam)}
-                        className={`text-xs py-2.5 px-3.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all ${
+                        className={`text-xs py-2.5 px-3.5 rounded-lg font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                           useWebcam
                             ? 'bg-accent-50 dark:bg-accent-950/30 border-accent-200 dark:border-accent-800 text-accent-700 dark:text-accent-300'
                             : 'bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500'
@@ -465,14 +429,14 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                             setGlobalProgress(0);
                           }
                         }}
-                        className="bg-accent-600 hover:bg-accent-700 text-white font-semibold py-2.5 px-6 rounded-lg text-xs uppercase tracking-wider active:scale-[0.98] transition-all"
+                        className="bg-accent-600 hover:bg-accent-700 text-white font-semibold py-3 px-6 rounded-lg text-xs uppercase tracking-wider active:scale-[0.98] transition-all cursor-pointer"
                       >
                         Iniciar Escaneo
                       </button>
                     ) : (
                       <button
                         onClick={() => { stopWebcam(); setFlowState('idle'); setGlobalProgress(0); setCurrentStepIndex(0); }}
-                        className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-6 rounded-lg text-xs uppercase tracking-wider active:scale-[0.98] transition-all"
+                        className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg text-xs uppercase tracking-wider active:scale-[0.98] transition-all cursor-pointer"
                       >
                         Abortar
                       </button>
@@ -568,14 +532,14 @@ MANTENGA LA SEGURIDAD DEL CAMPUS EN TODO MOMENTO!
                 <div className="bg-zinc-50 dark:bg-zinc-800/50 border-t border-zinc-200 dark:border-zinc-700 px-5 py-3.5 flex justify-between items-center gap-2">
                   <button
                     onClick={handlePrintReceipt}
-                    className="px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-lg transition-all text-xs font-semibold flex items-center gap-1.5"
+                    className="px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-lg transition-all text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5" weight="regular" />
                     Bajar Recibo
                   </button>
                   <button
                     onClick={() => { setFlowState('idle'); setGlobalProgress(0); setCurrentStepIndex(0); }}
-                    className="bg-accent-600 hover:bg-accent-700 text-white font-semibold py-2.5 px-5 text-xs uppercase tracking-wider rounded-lg active:scale-[0.98] transition-all"
+                    className="bg-accent-600 hover:bg-accent-700 text-white font-semibold py-3 px-5 text-xs uppercase tracking-wider rounded-lg active:scale-[0.98] transition-all cursor-pointer"
                   >
                     Nuevo Escaneo
                   </button>

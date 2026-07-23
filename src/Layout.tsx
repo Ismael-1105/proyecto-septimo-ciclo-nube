@@ -21,7 +21,7 @@ export default function Layout() {
         <div className="flex items-center gap-1.5">
           <button
             onClick={toggleTheme}
-            className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
+            className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all cursor-pointer"
             title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
             aria-label={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
           >
@@ -31,7 +31,7 @@ export default function Layout() {
           {!user && (
             <button
               onClick={() => navigate('/kiosco')}
-              className="ml-1 inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold px-4 py-2 rounded-lg text-xs transition-all active:scale-[0.98] border border-zinc-200 dark:border-zinc-700"
+              className="ml-1 inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold px-4 py-2 rounded-lg text-xs transition-all active:scale-[0.98] border border-zinc-200 dark:border-zinc-700 cursor-pointer"
               aria-label="Abrir kiosco de acceso"
             >
               <Camera className="w-3.5 h-3.5" weight="regular" />
@@ -42,7 +42,7 @@ export default function Layout() {
           {user ? (
             <button
               onClick={() => { handleLogout(); navigate('/'); }}
-              className="ml-1 inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-700 dark:text-red-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all active:scale-[0.98] border border-red-200 dark:border-red-800/40"
+              className="ml-1 inline-flex items-center gap-1.5 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-700 dark:text-red-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all active:scale-[0.98] border border-red-200 dark:border-red-800/40 cursor-pointer"
               aria-label="Cerrar sesión"
             >
               <SignOut className="w-3.5 h-3.5" weight="regular" />

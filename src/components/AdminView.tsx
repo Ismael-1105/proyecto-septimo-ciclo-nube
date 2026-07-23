@@ -87,7 +87,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
       } py-5`}>
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="w-full py-2 px-2 text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 mb-4"
+          className="w-full py-2 px-2 text-xs rounded-lg font-semibold transition-all flex items-center justify-center gap-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 mb-4 cursor-pointer"
           aria-label={sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'}
         >
           <List className="w-4 h-4" weight="regular" />
@@ -104,7 +104,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setSearchQuery(''); }}
-                className={`w-full py-2.5 px-3 text-xs text-left rounded-lg font-semibold transition-all flex items-center gap-2.5 ${
+                className={`w-full py-2.5 px-3 text-xs text-left rounded-lg font-semibold transition-all flex items-center gap-2.5 cursor-pointer ${
                   activeTab === tab
                     ? 'bg-accent-600 text-white shadow-sm'
                     : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200'
@@ -139,7 +139,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
                 key={tab}
                 onClick={() => { setActiveTab(tab); setSearchQuery(''); }}
                 title={tab === 'overview' ? 'Vista General' : tab === 'students' ? `Alumnos (${students.length})` : tab === 'logs' ? `Historial (${logs.length})` : tab === 'alerts' ? 'Alertas' : tab === 'reports' ? 'Reportes' : 'Calibración'}
-                className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center transition-all ${
+                className={`w-10 h-10 mx-auto rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   activeTab === tab
                     ? 'bg-accent-600 text-white shadow-sm'
                     : 'text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -149,10 +149,10 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
               </button>
             ))}
             <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-1">
-              <Link to="/docente/demo" title="Simulador de Escaneo" className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all">
+              <Link to="/docente/demo" title="Simulador de Escaneo" className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all cursor-pointer">
                 <Cpu className="w-5 h-5" weight="regular" />
               </Link>
-              <Link to="/docente/arquitectura" title="Arquitectura Cloud" className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all">
+              <Link to="/docente/arquitectura" title="Arquitectura Cloud" className="w-10 h-10 mx-auto rounded-lg flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all cursor-pointer">
                 <ChartBar className="w-5 h-5" weight="regular" />
               </Link>
             </div>
@@ -168,7 +168,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
           )}
           <button
             onClick={() => navigate('/')}
-            className={`rounded-lg font-semibold transition-all flex items-center gap-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 ${
+            className={`rounded-lg font-semibold transition-all flex items-center gap-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer ${
               sidebarCollapsed ? 'w-10 h-10 mx-auto justify-center py-2 px-2' : 'w-full py-2.5 px-3 text-xs text-left'
             }`}
             title="Cerrar sesión"
@@ -191,11 +191,11 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
               { label: 'Accesos Hoy', value: stats.accessesToday, icon: SignIn, accent: 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400' },
               { label: 'Bloqueos', value: stats.deniedToday, icon: XCircle, accent: 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400' },
               { label: 'Alertas', value: stats.alertsActive, icon: ShieldWarning, accent: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400', alert: true },
-              ].map(({ label, value, icon: Icon, accent, alert }) => (
+              ].map(({ label, value, icon: Icon, accent, alert }, i) => (
                 <div key={label} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 flex items-center justify-between shadow-sm">
                   <div>
                     <span className="text-[10px] font-mono tracking-wider text-zinc-400 dark:text-zinc-500 block font-bold uppercase">{label}</span>
-                    <p className={`text-3xl font-black tracking-tight mt-1 ${alert && value > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white'}`}>
+                    <p className={`${i === 0 ? 'text-3xl' : 'text-2xl'} font-black tracking-tight mt-1 ${alert && value > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white'}`}>
                       {value}
                     </p>
                   </div>
@@ -278,7 +278,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
                   <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Ultimas Lecturas</h4>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">Logs en tiempo real.</p>
                 </div>
-                <button onClick={() => setActiveTab('logs')} className="text-xs text-accent-600 dark:text-accent-400 font-semibold hover:underline">
+                <button onClick={() => setActiveTab('logs')} className="text-xs text-accent-600 dark:text-accent-400 font-semibold hover:underline cursor-pointer">
                   Ver todos
                 </button>
               </div>
@@ -343,7 +343,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
               </div>
               <button
                 onClick={() => setShowEnrollment(true)}
-                className="bg-accent-600 hover:bg-accent-700 text-white font-semibold px-4 py-2.5 text-xs rounded-lg uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-[0.98]"
+                className="bg-accent-600 hover:bg-accent-700 text-white font-semibold px-4 py-2.5 text-xs rounded-lg uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
               >
                 <Plus className="w-4 h-4" weight="bold" />
                 Matricular Alumno
@@ -419,14 +419,14 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
               </div>
               <div className="flex gap-2">
                 <button onClick={handleExportCSV}
-                  className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all">
+                  className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer">
                   <FileCsv className="w-4 h-4" weight="regular" />
                   Descargar CSV
                 </button>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-sm text-xs">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm text-xs">
               <div className="relative w-full sm:max-w-xs">
                 <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4" weight="regular" />
                 <input type="text" placeholder="Buscar estudiante..."
@@ -434,7 +434,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs transition-all" />
               </div>
-              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
                 <span className="text-zinc-400 dark:text-zinc-500 font-semibold flex-shrink-0">Filtrar:</span>
                 <select value={logFilter}
                   onChange={(e) => setLogFilter(e.target.value as typeof logFilter)}
@@ -560,7 +560,7 @@ export default function AdminView({ mode: navigationMode }: { mode?: 'demo' | 'a
               <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Eliminar todos los registros de acceso del sistema.</p>
               <button
                 onClick={() => setConfirmOpen(true)}
-                className="px-4 py-2 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200"
+                className="px-4 py-2 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 cursor-pointer"
               >
                 <Trash className="w-4 h-4" weight="regular" />
                 Limpiar historial de accesos

@@ -69,7 +69,7 @@ export default function LoginView() {
                   placeholder="••••••••"
                   className="w-full text-sm p-2.5 pr-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 outline-none transition-all"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer">
                   {showPassword ? <EyeSlash className="w-4 h-4" weight="regular" /> : <Eye className="w-4 h-4" weight="regular" />}
                 </button>
               </div>
@@ -81,7 +81,7 @@ export default function LoginView() {
               </motion.p>
             )}
 
-            <button type="submit" className="w-full bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-sm transition-all">
+            <button type="submit" className="w-full bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold py-3 rounded-xl text-sm transition-all cursor-pointer">
               Iniciar sesión
             </button>
 

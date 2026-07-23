@@ -59,13 +59,13 @@ export default function ConfirmDialog({
             <div className="flex gap-2.5 w-full mt-1">
               <button
                 onClick={onCancel}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all duration-200 active:scale-[0.98]"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all duration-200 active:scale-[0.98] cursor-pointer"
               >
                 {cancelLabel}
               </button>
               <button
                 onClick={onConfirm}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.98] ${
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-[0.98] cursor-pointer ${
                   variant === 'danger'
                     ? 'bg-red-600 hover:bg-red-700 text-white'
                     : 'bg-accent-600 hover:bg-accent-700 text-white'

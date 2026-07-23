@@ -24,7 +24,7 @@ export default function StudentProfile({ student, logs, onBack }: StudentProfile
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all"
+          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all cursor-pointer"
           aria-label="Volver al kiosco"
         >
           <ArrowLeft className="w-4 h-4" weight="regular" />
@@ -38,7 +38,7 @@ export default function StudentProfile({ student, logs, onBack }: StudentProfile
         </div>
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all"
+          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all cursor-pointer"
           aria-label="Salir del perfil"
         >
           Salir

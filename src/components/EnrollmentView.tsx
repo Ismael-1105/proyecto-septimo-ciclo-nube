@@ -130,7 +130,7 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
         </div>
         <button
           onClick={onCancel}
-          className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
+          className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all cursor-pointer"
         >
           <X className="w-4 h-4" weight="bold" />
         </button>
@@ -141,15 +141,19 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
         {STEPS.map((s, i) => (
           <div key={s.label} className="flex-1 flex items-center">
             <div className={`flex items-center gap-2 ${i <= step ? 'text-accent-600 dark:text-accent-400' : 'text-zinc-300 dark:text-zinc-600'}`}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
-                i < step
-                  ? 'bg-accent-600 text-white'
-                  : i === step
-                  ? 'bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-400 border-2 border-accent-600 dark:border-accent-400'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600'
-              }`}>
-                {i < step ? <CheckCircle className="w-3.5 h-3.5" weight="fill" /> : i + 1}
-              </div>
+              {i < step ? (
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all bg-accent-600 text-white">
+                  <CheckCircle className="w-3.5 h-3.5" weight="fill" />
+                </div>
+              ) : i === step ? (
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all bg-accent-100 dark:bg-accent-900/30 text-accent-600 dark:text-accent-400 border-2 border-accent-600 dark:border-accent-400">
+                  {i + 1}
+                </div>
+              ) : (
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600">
+                  {i + 1}
+                </div>
+              )}
               <span className="text-[10px] font-semibold hidden sm:inline">{s.label}</span>
             </div>
             {i < STEPS.length - 1 && (
@@ -206,9 +210,9 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
             {/* Step 1: Captura biométrica */}
             {step === 1 && (
               <div className="space-y-4">
-                <div className="relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 aspect-video flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-600">
+                <div className="relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 aspect-video flex items-center justify-center border-2 border-dashed border-zinc-300 dark:border-zinc-600 cursor-crosshair">
                   {useWebcam ? (
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover cursor-crosshair" />
                   ) : capturedImage ? (
                     <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
                   ) : isCapturing ? (
@@ -225,12 +229,12 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
                   {useWebcam && (
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                       <button onClick={capturePhoto}
-                        className="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-[0.98]">
+                        className="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer">
                         <CameraIcon className="w-4 h-4" weight="fill" />
                         Capturar
                       </button>
                       <button onClick={stopWebcam}
-                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.98]">
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.98] cursor-pointer">
                         Detener
                       </button>
                     </div>
@@ -238,7 +242,7 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
                   {capturedImage && !useWebcam && (
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                       <button onClick={() => { setCapturedImage(null); }}
-                        className="px-4 py-2 bg-zinc-700/80 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold transition-all">
+                        className="px-4 py-2 bg-zinc-700/80 hover:bg-zinc-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
                         Repetir
                       </button>
                     </div>
@@ -251,7 +255,7 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
                   {!useWebcam && !capturedImage && !isCapturing && (
                     <>
                       <button onClick={startWebcam}
-                        className="px-5 py-2.5 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-[0.98]">
+                        className="px-5 py-2.5 bg-accent-600 hover:bg-accent-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer">
                         <CameraIcon className="w-4 h-4" weight="fill" />
                         Usar cámara web
                       </button>
@@ -328,7 +332,7 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
       <div className="flex items-center justify-between px-5 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
         <button
           onClick={step === 0 ? onCancel : () => setStep((step - 1) as StepIndex)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" weight="bold" />
           {step === 0 ? 'Cancelar' : 'Anterior'}
@@ -337,7 +341,7 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
           <button
             onClick={() => setStep((step + 1) as StepIndex)}
             disabled={!canGoNext()}
-            className="inline-flex items-center gap-1.5 bg-accent-600 hover:bg-accent-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-semibold px-5 py-2 rounded-xl text-xs transition-all active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 bg-accent-600 hover:bg-accent-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-semibold px-5 py-2 rounded-xl text-xs transition-all active:scale-[0.98] cursor-pointer"
           >
             Siguiente
             <ArrowRight className="w-3.5 h-3.5" weight="bold" />
@@ -345,7 +349,7 @@ export default function EnrollmentView({ onComplete, onCancel }: EnrollmentViewP
         ) : (
           <button
             onClick={handleSubmit}
-            className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-xl text-xs transition-all active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-xl text-xs transition-all active:scale-[0.98] cursor-pointer"
           >
             <CheckCircle className="w-4 h-4" weight="fill" />
             Cargar Biometría

@@ -32,7 +32,6 @@ export default function HomeView() {
       {/* HERO — 1 solo CTA principal (Hick's Law) */}
       <section className="relative min-h-[calc(100dvh-64px)] flex items-center overflow-hidden bg-surface dark:bg-zinc-950">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(37,99,235,0.06),transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.12),transparent_60%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#27272a_1px,transparent_1px),linear-gradient(to_bottom,#27272a_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_30%_50%,black_30%,transparent_70%)] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto w-full px-6 md:px-10 py-16 md:py-20 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
@@ -47,7 +46,7 @@ export default function HomeView() {
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}
               className="text-4xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-white leading-[1.05] tracking-tight mt-6"
             >
-              Control de acceso biométrico para tu laboratorio
+              Control de acceso biométrico para el laboratorio
             </motion.h1>
 
             <motion.p
@@ -64,7 +63,7 @@ export default function HomeView() {
             >
               <button
                 onClick={() => { setShowPermissionGate(true); navigate('/kiosco'); }}
-                className="inline-flex items-center justify-center gap-2 bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold px-8 py-4 rounded-xl text-base transition-all shadow-lg shadow-accent-500/20 dark:shadow-accent-500/10"
+                className="inline-flex items-center justify-center gap-2 bg-accent-600 hover:bg-accent-700 active:scale-[0.98] text-white font-semibold px-8 py-4 rounded-xl text-base transition-all shadow-lg shadow-accent-500/20 dark:shadow-accent-500/10 cursor-pointer"
               >
                 Acceder al laboratorio
                 <ArrowRight className="w-5 h-5" weight="bold" />
@@ -90,7 +89,7 @@ export default function HomeView() {
             {FEATURES.map((f, i) => {
               const Icon = f.icon;
               return (
-                <div key={i} className="group rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 p-8 flex flex-col gap-4 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-200">
+                <div key={i} className="group rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 p-8 flex flex-col gap-4 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-200">
                   <div className="w-11 h-11 rounded-xl bg-accent-50 dark:bg-accent-950/40 flex items-center justify-center">
                     <Icon className="w-5 h-5 text-accent-600 dark:text-accent-400" weight="regular" />
                   </div>

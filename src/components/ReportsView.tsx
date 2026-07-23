@@ -67,7 +67,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
         </div>
         <div className="flex gap-2">
           <button onClick={handleExportCSV}
-            className="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+            className="px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer">
             <FileCsv className="w-4 h-4" weight="regular" />
             Exportar CSV
           </button>
@@ -79,7 +79,7 @@ export default function ReportsView({ logs }: ReportsViewProps) {
         {['day', 'week', 'month'].map(p => (
           <button key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               period === p
                 ? 'bg-accent-600 text-white shadow-sm'
                 : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'

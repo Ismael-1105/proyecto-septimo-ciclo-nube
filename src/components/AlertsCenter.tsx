@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   WarningOctagon, WarningCircle, Info, CheckCircle,
-  Trash, Clock
+  Trash, Clock, ShieldCheck
 } from '@phosphor-icons/react';
 import type { Alert } from '../types.ts';
 
@@ -70,7 +70,7 @@ export default function AlertsCenter({ alerts, onAcknowledge, onResolve }: Alert
           <button
             key={key}
             onClick={() => setActiveFilter(key)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeFilter === key
                 ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
@@ -121,19 +121,19 @@ export default function AlertsCenter({ alerts, onAcknowledge, onResolve }: Alert
                     </div>
                   </div>
                   {/* Actions: solo visibles en hover (progressive disclosure) */}
-                  <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                  <div className="flex items-center gap-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                     {alert.status === 'active' && (
                       <button onClick={() => onAcknowledge(alert.id)}
-                        className="p-2 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/30 transition-all"
+                        className="p-2.5 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/30 transition-all cursor-pointer"
                         title="Reconocer" aria-label="Reconocer alerta">
                         <CheckCircle className="w-4 h-4" weight="regular" />
                       </button>
                     )}
                     {(alert.status === 'active' || alert.status === 'acknowledged') && (
                       <button onClick={() => onResolve(alert.id)}
-                        className="p-2 rounded-xl text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/30 transition-all"
+                        className="p-2.5 rounded-xl text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-950/30 transition-all cursor-pointer"
                         title="Resolver" aria-label="Resolver alerta">
-                        <CheckCircle className="w-4 h-4" weight="regular" />
+                        <ShieldCheck className="w-4 h-4" weight="regular" />
                       </button>
                     )}
                   </div>
@@ -143,7 +143,7 @@ export default function AlertsCenter({ alerts, onAcknowledge, onResolve }: Alert
           </AnimatePresence>
         ) : (
           <div className="py-14 text-center text-zinc-400 dark:text-zinc-500">
-            <CheckCircle className="w-10 h-10 mx-auto mb-3 text-zinc-300 dark:text-zinc-600" weight="regular" />
+            <ShieldCheck className="w-10 h-10 mx-auto mb-3 text-zinc-300 dark:text-zinc-600" weight="regular" />
             <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">No hay alertas {activeFilter === 'active' ? 'activas' : activeFilter === 'acknowledged' ? 'reconocidas' : 'resueltas'}</p>
             <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">Todo en orden con el ecosistema biométrico.</p>
           </div>

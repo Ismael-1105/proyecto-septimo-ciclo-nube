@@ -95,7 +95,7 @@ export default function CameraPermissionGate({ onProceed, onCancel }: CameraPerm
                 <button
                   onClick={handleRequest}
                   disabled={isRequesting}
-                  className="w-full bg-accent-600 hover:bg-accent-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="w-full bg-accent-600 hover:bg-accent-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isRequesting ? (
                     <>
@@ -134,7 +134,7 @@ export default function CameraPermissionGate({ onProceed, onCancel }: CameraPerm
               {permissionState !== 'granted' && (
                 <button
                   onClick={onCancel}
-                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 text-zinc-600 dark:text-zinc-300 font-semibold py-2.5 rounded-xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
+                  className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 text-zinc-600 dark:text-zinc-300 font-semibold py-2.5 rounded-xl text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <X className="w-4 h-4" weight="regular" />
                   Cancelar
