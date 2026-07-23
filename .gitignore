@@ -13,3 +13,18 @@ coverage/
 
 
 .vercel
+
+# Terraform (el lock .terraform.lock.hcl SI se versiona)
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+*.tfplan
+builds/
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
