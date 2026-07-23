@@ -1,6 +1,6 @@
 import React from 'react';
 import { Fingerprint, SignIn, Moon, Sun, Camera } from '@phosphor-icons/react';
-import { useTheme } from '../App.tsx';
+import { useApp } from '../context/AppContext.tsx';
 
 interface HeaderProps {
   onLoginClick: () => void;
@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onLoginClick, onStudentKioskClick }: HeaderProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useApp();
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 h-16 flex items-center justify-between px-5 md:px-8 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800">
