@@ -46,7 +46,7 @@ export default function HomeView() {
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}
               className="text-4xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-white leading-[1.05] tracking-tight mt-6"
             >
-              Control de acceso biométrico para el laboratorio
+              Control de acceso biométrico para el laboratorio yyy
             </motion.h1>
 
             <motion.p
