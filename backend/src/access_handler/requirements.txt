@@ -1,0 +1,3 @@
+# boto3 ya viene incluido en el runtime de AWS Lambda para Python.
+# Se lista aqui solo para desarrollo y pruebas locales.
+boto3

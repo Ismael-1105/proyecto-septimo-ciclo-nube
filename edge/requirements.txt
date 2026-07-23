@@ -1,0 +1,10 @@
+# Dependencias del cliente de borde (kiosco) Acceso-Facial-Lab.
+
+# Cliente HTTP para POST /access hacia la API central.
+requests
+
+# Dependencias de hardware: solo aplican en la Raspberry Pi 4 del kiosco.
+# No instalar en maquinas de desarrollo; descomentar al aprovisionar la Pi.
+# gpiozero        # sensor PIR y modulo de rele por GPIO (alternativa: RPi.GPIO)
+# RPi.GPIO        # acceso GPIO de bajo nivel, alternativa a gpiozero
+# picamera2       # captura de imagen con el modulo de camara oficial

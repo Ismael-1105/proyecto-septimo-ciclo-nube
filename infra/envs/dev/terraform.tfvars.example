@@ -1,0 +1,16 @@
+# Copiar a terraform.tfvars y completar. El archivo real NO se versiona
+# (esta en .gitignore) porque contiene valores propios de cada despliegue.
+
+# Sufijo para unicidad global de los buckets S3. Por confirmar con el grupo.
+# Sugerencia: iniciales del grupo mas digitos, todo en minusculas.
+bucket_suffix = "grupo1-uide-000000"
+
+# Correo que recibe las alertas (accesos denegados, alarmas). Por confirmar.
+# Dejar "" para no crear la suscripcion todavia.
+alert_email = ""
+
+# Umbral de similitud facial (el informe fija el orden del 95 al 99).
+similarity_threshold = "95"
+
+# Dias de retencion de evidencias en S3.
+evidence_retention_days = 90
