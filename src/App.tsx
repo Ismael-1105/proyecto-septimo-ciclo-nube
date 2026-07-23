@@ -53,6 +53,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
+  const { setShowPermissionGate } = useApp();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2200);
@@ -60,8 +61,6 @@ function AppContent() {
   }, []);
 
   if (isLoading) return <SplashScreen />;
-
-  const { setShowPermissionGate } = useApp();
 
   return (
     <Routes>
