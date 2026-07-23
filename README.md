@@ -2,6 +2,27 @@
 
 Sistema inteligente de control de acceso por reconocimiento facial para laboratorios universitarios.
 
+Este repositorio contiene el proyecto completo: el frontend (React + Vite), el
+backend de demo desplegado en Vercel (`api/`), las Lambdas de la arquitectura
+AWS (`backend/`), el cliente del kiosco (`edge/`) y la infraestructura como
+codigo en Terraform (`infra/`).
+
+## Estructura del repositorio
+
+```
+src/        Frontend React (portal docente y kiosco)
+api/        Backend serverless de demo en Vercel (ver docs/backend-api.md)
+backend/    Lambdas Python de la arquitectura AWS (acceso y enrolamiento)
+edge/       Cliente Python del kiosco (Raspberry Pi)
+infra/      Infraestructura Terraform modular de AWS (11 modulos)
+docs/       Documentacion del proyecto
+```
+
+La arquitectura de la solucion es serverless sobre AWS: API Gateway, Lambda,
+Rekognition (colecciones y Face Liveness), DynamoDB, S3, Cognito, KMS, SNS y
+CloudWatch, aprovisionados con los modulos de `infra/`. El despliegue web de
+demostracion se sirve por HTTPS en https://faceaccess-lab.vercel.app.
+
 ## Roles de usuario
 
 | Rol | Interfaz | Acceso |
